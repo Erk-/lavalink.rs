@@ -24,7 +24,7 @@ impl Connect {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Disconnect {
-    guild_id: String,
+    pub guild_id: String,
     op: Opcode,
 }
 
