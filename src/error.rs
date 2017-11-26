@@ -17,7 +17,6 @@ pub enum Error {
     Json(JsonError),
     PlayerAlreadyExists,
     Send(String),
-    StatsNotPresent,
     UriParse(ParseError),
     WebSocket(WebSocketError),
 }
@@ -36,7 +35,6 @@ impl StdError for Error {
             Error::Json(ref inner) => inner.description(),
             Error::PlayerAlreadyExists => "Player already exists for the guild",
             Error::Send(ref inner) => inner,
-            Error::StatsNotPresent => "No stats are present",
             Error::UriParse(ref inner) => inner.description(),
             Error::WebSocket(ref inner) => inner.description(),
         }
