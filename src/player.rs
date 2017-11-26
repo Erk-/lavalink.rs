@@ -1,9 +1,9 @@
 use parking_lot::Mutex;
-use super::model::{IntoWebSocketMessage, Pause, Play, Stop, Volume};
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::sync::mpsc::Sender;
 use std::sync::Arc;
+use super::model::{IntoWebSocketMessage, Pause, Play, Stop, Volume};
 use websocket::OwnedMessage;
 use ::prelude::*;
 
