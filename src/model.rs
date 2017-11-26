@@ -105,15 +105,15 @@ impl Play {
 pub struct Seek {
     pub guild_id: String,
     op: Opcode,
-    pub seek: bool,
+    pub position: i64,
 }
 
 impl Seek {
-    pub fn new<S: Into<String>>(guild_id: S, seek: bool) -> Self {
+    pub fn new<S: Into<String>>(guild_id: S, position: i64) -> Self {
         Self {
             guild_id: guild_id.into(),
             op: Opcode::Seek,
-            seek,
+            position,
         }
     }
 }
