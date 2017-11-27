@@ -100,9 +100,7 @@ impl FromStr for Opcode {
             "playerUpdate" => PlayerUpdate,
             "stats" => Stats,
             "event" => Event,
-            _ => {
-                return Err(Unknown);
-            },
+            _ => return Err(Unknown),
         })
     }
 }
