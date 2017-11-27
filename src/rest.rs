@@ -6,6 +6,7 @@ use serde_json;
 use std::io::Read;
 use ::prelude::*;
 
+/// An HTTP client used to communicate with a LavaLink node.
 #[derive(Debug, Default)]
 pub struct HttpClient {
     client: Client,
@@ -14,6 +15,16 @@ pub struct HttpClient {
 }
 
 impl HttpClient {
+    /// Creates a new hyper Client wrapper used to communicate with a LavaLink
+    /// node.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use lavalink::rest::HttpClient;
+    ///
+    /// let client = HttpClient::new("127.0.0.1:2333", "test_password");
+    /// ```
     pub fn new<S, V>(host: S, password: V) -> Self
         where S: Into<String>, V: Into<Vec<u8>> {
         Self {
@@ -98,22 +109,34 @@ impl HttpClient {
     }
 }
 
+/// Meta information about a loaded track.
 #[derive(Clone, Debug, Deserialize)]
 pub struct LoadedTrackInfo {
+    /// The title of the track.
     pub title: String,
+    /// The name of the author of the track.
     pub author: String,
+    /// The length of the track in frames.
     pub length: i64,
+    /// The ID of the track.
     pub identifier: String,
+    /// The URI to the track.
     pub uri: String,
+    /// Whether the track is a stream.
     #[serde(rename = "isStream")]
     pub is_stream: bool,
+    /// Whether the track can be seeked.
     #[serde(rename = "isSeekable")]
     pub is_seekable: bool,
+    /// The current position in the track.
     pub position: i64,
 }
 
+/// Information about a track.
 #[derive(Clone, Debug, Deserialize)]
 pub struct LoadedTrack {
+    /// Base64 encoded representation of the track.
     pub track: String,
+    /// Meta information about the track.
     pub info: LoadedTrackInfo,
 }

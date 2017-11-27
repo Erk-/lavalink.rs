@@ -16,7 +16,7 @@ Here is a list of known libraries:
 
 ### Installation
 
-If using [`lavalink.rs`] directly, add the following to your `Cargo.toml`:
+If using `lavalink.rs` directly, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -25,7 +25,7 @@ lavalink = { git = "https://github.com/serenity-rs/lavalink.rs" }
 
 And the following to your project's `main.rs` or `lib.rs`:
 
-```rs
+```rust
 extern crate lavalink;
 ```
 

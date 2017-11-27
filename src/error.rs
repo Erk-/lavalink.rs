@@ -8,16 +8,31 @@ use std::sync::mpsc::SendError;
 use websocket::client::ParseError;
 use websocket::WebSocketError;
 
+/// Common result type returned by library functions.
+///
+/// The Err type is always [`Error`].
+///
+/// [`Error`]: enum.Error.html
 pub type Result<T> = StdResult<T, Error>;
 
+/// Common error type used throughout the library's return types.
 #[derive(Debug)]
 pub enum Error {
+    /// An error from the `hyper` crate.
     Hyper(HyperError),
+    /// An error from the `std::io` module.
     Io(IoError),
+    /// An error from the `serde_json` crate.
     Json(JsonError),
+    /// A player already exists for the guild.
     PlayerAlreadyExists,
+    /// An error occurred sending a WebSocket message to an mpsc Receiver.
+    ///
+    /// This is the `Display` implementation of the error.
     Send(String),
+    /// An error occurred while parsing a URI.
     UriParse(ParseError),
+    /// An error from the `websocket` crate.
     WebSocket(WebSocketError),
 }
 

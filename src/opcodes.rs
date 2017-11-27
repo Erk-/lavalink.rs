@@ -1,53 +1,88 @@
+//! A collection of opcodes for use between the LavaLink client and server.
+
 use std::str::FromStr;
 use std::string::ToString;
 
+/// An opcode used to indicate the type of message received.
+///
+/// Note that although serde's `Deserialize` and `Serialize` are derived on this
+/// type, it may be preferable to use the `FromStr` and `ToString`
+/// implementations for performance in some cases.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Opcode {
-    // client -> server | Make the server queue a voice connection
-    // guild_id: String, channel_id: String
+    /// Makes the server queue a voice connection.
+    ///
+    /// This is sent by the client to the server.
     Connect,
-    // client -> server | Close a voice connection
-    // guild_id: String
+    /// Makes the server close a voice connection.
+    ///
+    /// This is sent by the client to the server.
     Disconnect,
-    // server -> client | Server emitted an event
+    /// Indicates that the server emitted an event.
+    ///
+    /// This is sent by the server to the client.
     Event,
-    // server- > client | Request to check if a shard's mainWS is connected
+    /// Request used to check if a shard is connected.
+    ///
+    /// This is sent by the server to the client.
     IsConnectedReq,
-    // client -> server | Response to IsConnectedRequest
-    // shard_id: i32, connected: bool
+    /// Sent in response to a [`IsConnectedReq`].
+    ///
+    /// This is sent by the client to the server.
+    ///
+    /// [`IsConnectedReq`]: #variant.IsConnectedReq
     IsConnectedRes,
-    // client -> server | Set player pause
-    // guild_id: String, pause: bool
+    /// Sets the pause state of a guild's player.
+    ///
+    /// This is sent by the client to the server.
     Pause,
-    // client -> server | Cause the player to play a track
-    // guild_id: String, track: String, start_time: i64
+    /// Causes the player to play a track.
+    ///
+    /// This is sent by the client to the server.
     Play,
-    // server -> client | Position information about a player
+    /// Includes information about the position of a player.
+    ///
+    /// This is sent by the server to the client.
     PlayerUpdate,
-    // client -> server | Make the player seek to a position of the track
-    // guild_id: String, position: i64
+    /// Makes the player seek to a position of the track.
+    ///
+    /// This is sent by the client to the server.
     Seek,
-    // server -> client | Incoming message to forward to mainWS
+    /// A WebSocket message payload to forward to the shard's WebSocket for
+    /// sending.
+    ///
+    /// This is sent by the server to the client.
     SendWS,
-    // server -> client | A collection of stats sent every minute
+    /// A set of statistics collected once a minute.
+    ///
+    /// This is sent by the server to the client.
     Stats,
-    // client -> server | Cause the player to stop
-    // guild_id: String
+    /// Causes a guild's player to stop.
+    ///
+    /// This is sent by the client to the server.
     Stop,
-    // Unknown opcode
+    /// An unknown opcode.
     Unknown,
-    // server -> client | Request to check if the VC or Guild exists, and that
-    // we have access to the VC
+    /// Request to check if the voice channel and/or guild exists and that the
+    /// client has access to the voice channel.
+    ///
+    /// This is sent by the server to the client.
     ValidationReq,
-    // client -> server | Response to ValidationRequest
-    // guild_id: String, channel_id: Option<String>, valid: bool
+    /// A response to a [`ValidationReq`] containing the received `guild_id`
+    /// and potentially `channel_id`, containing a `valid` with a boolean
+    /// indicating whether the combination is valid.
+    ///
+    /// This is sent by the client to the server.
     ValidationRes,
-    // client -> server | Provide an intercepted voice server update
-    // session_id: String, event: String
+    /// A voice state update received from Discord to be forwarded.
+    ///
+    /// This is sent by the client to the server.
     VoiceUpdate,
-    // client -> server | Set player volume from 1 to 150 (100 default)
-    // guild_id: String, volume: i32
+    /// Sets the player volume information, on a scale of 1 to 150. The default
+    /// is 100.
+    ///
+    /// This is sent by the client to the server.
     Volume,
 }
 
