@@ -26,7 +26,7 @@ impl Connect {
     ///
     /// let _msg = Connect::new("381880193700069380", "381880193251409931");
     /// ```
-    pub fn new<S: Into<String>>(channel_id: S, guild_id: S) -> Self {
+    pub fn new<S: Into<String>>(guild_id: S, channel_id: S) -> Self {
         Self {
             channel_id: channel_id.into(),
             guild_id: guild_id.into(),
