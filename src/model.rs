@@ -314,8 +314,6 @@ impl ValidationResponse {
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VoiceUpdate {
-    /// The endpoint of the voice state.
-    pub endpoint: String,
     /// The event data for the voice update.
     pub event: VoiceUpdateEvent,
     /// The guild which an update was dispatched for.
@@ -323,8 +321,6 @@ pub struct VoiceUpdate {
     op: Opcode,
     /// The session ID for the voice session.
     pub session_id: String,
-    /// The token.
-    pub token: String,
 }
 
 impl VoiceUpdate {
@@ -336,16 +332,14 @@ impl VoiceUpdate {
         let token = token.into();
 
         Self {
-            endpoint: endpoint.clone(),
             event: VoiceUpdateEvent {
                 endpoint: endpoint,
                 guild_id: guild_id.clone(),
-                token: token.clone(),
+                token: token,
             },
             op: Opcode::VoiceUpdate,
             session_id: session_id.into(),
             guild_id,
-            token,
         }
     }
 }
