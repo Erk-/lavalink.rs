@@ -1,9 +1,11 @@
 //! A collection of messages to send to and receive from the LavaLink node.
 
 use serde_json;
+use serde::Serializer;
 use super::opcodes::Opcode;
 use websocket::OwnedMessage;
 use ::prelude::*;
+use std::result::Result as StdResult;
 
 /// Message used to connect a new player.
 #[derive(Deserialize, Serialize)]
@@ -133,6 +135,7 @@ pub struct Play {
     /// The time at which to end the stream.
     ///
     /// If set to `None`, this will play until the stream ends.
+    #[serde(serialize_with = "serialize_option_u64")]
     pub end_time: Option<u64>,
     /// The ID of the guild whose player is having a stream added.
     pub guild_id: String,
@@ -140,6 +143,7 @@ pub struct Play {
     /// The time at which to start the stream.
     ///
     /// If set to `None`, this will play starting at the start of a stream.
+    #[serde(serialize_with = "serialize_option_u64")]
     pub start_time: Option<u64>,
     /// The base64 encoded track information.
     pub track: String,
@@ -348,7 +352,7 @@ impl VoiceUpdate {
 ///
 /// [`VoiceUpdate`]: struct.VoiceUpdate.html
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct VoiceUpdateEvent {
     /// The endpoint of the voice state.
     pub endpoint: String,
@@ -395,6 +399,16 @@ impl Volume {
 pub trait IntoWebSocketMessage {
     /// Converted a message into a JSON serialized WebSocket message.
     fn into_ws_message(self) -> Result<OwnedMessage>;
+}
+
+/// Utility function to serialize Option<u64> with no present value as 0 instead of null
+fn serialize_option_u64<S: Serializer>(option: &Option<u64>, s: S) -> StdResult<S::Ok, S::Error> {
+    let value = match *option {
+        Some(value) => value,
+        None => 0,
+    };
+
+    s.serialize_u64(value)
 }
 
 macro_rules! impl_stuff_for_model {
