@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::sync::mpsc::Sender;
 use std::sync::Arc;
-use std::rc::Rc;
 use super::model::{IntoWebSocketMessage, Pause, Play, Stop, Volume};
 use websocket::OwnedMessage;
 use ::prelude::*;
@@ -61,7 +60,8 @@ impl AudioPlayer {
             Ok(_) => {
                 self.track = Some(track.to_string());
 
-                self.listener.track_start(self, track);
+                self.listener.clone()
+                    .track_start(self, track);
             },
             Err(e) => {
                 error!("play websocket send error {:?}", e);
@@ -81,7 +81,8 @@ impl AudioPlayer {
                 let track = self.track.clone().unwrap_or_else(|| "no track in state".to_string());
                 self.track = None;
 
-                self.listener.track_end(self, &track, "no reason");
+                self.listener.clone()
+                    .track_end(self, &track, "no reason");
 
                 debug!("stopped playing track {:?}", track);
             },
@@ -103,10 +104,12 @@ impl AudioPlayer {
             Ok(_) => {
                 self.paused = pause;
 
+                let listener = self.listener.clone();
+
                 if pause {
-                    self.listener.player_pause(self);
+                    listener.player_pause(self);
                 } else {
-                    self.listener.player_resume(self);
+                    listener.player_resume(self);
                 }
 
                 debug!("pause audio player: {}", pause);
