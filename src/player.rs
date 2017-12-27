@@ -22,11 +22,11 @@ pub struct AudioPlayer {
     pub position: i64,
     pub paused: bool,
     pub volume: i32,
-    listener: Arc<Box<AudioPlayerListener>>,
+    listener: Arc<AudioPlayerListener>,
 }
 
 impl AudioPlayer {
-    fn new(sender: Arc<Mutex<Sender<OwnedMessage>>>, guild_id: u64, listener: Arc<Box<AudioPlayerListener>>) -> Self {
+    fn new(sender: Arc<Mutex<Sender<OwnedMessage>>>, guild_id: u64, listener: Arc<AudioPlayerListener>) -> Self {
         Self {
             sender,
             guild_id,
