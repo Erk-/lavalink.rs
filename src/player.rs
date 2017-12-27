@@ -162,11 +162,11 @@ impl Debug for AudioPlayer {
 #[derive(Clone)]
 pub struct AudioPlayerManager {
     players: AudioPlayerMap,
-    pub listener: Arc<Box<AudioPlayerListener>>,
+    pub listener: Arc<AudioPlayerListener>,
 }
 
 impl AudioPlayerManager {
-    pub fn new(listener: Arc<Box<AudioPlayerListener>>) -> Self {
+    pub fn new(listener: Arc<AudioPlayerListener>) -> Self {
         Self {
             players: HashMap::default(),
             listener,
