@@ -1,4 +1,3 @@
-use hyper::Error as HyperError;
 use serde_json::Error as JsonError;
 use std::error::Error as StdError;
 use std::fmt::{Display, Formatter, Result as FmtResult};
@@ -7,6 +6,11 @@ use std::result::Result as StdResult;
 use std::sync::mpsc::SendError;
 use websocket::client::ParseError;
 use websocket::WebSocketError;
+
+#[cfg(feature = "hyper")]
+use hyper::error::{Error as HyperError, UriError};
+#[cfg(feature = "reqwest")]
+use reqwest::Error as ReqwestError;
 
 /// Common result type returned by library functions.
 ///
@@ -19,6 +23,7 @@ pub type Result<T> = StdResult<T, Error>;
 #[derive(Debug)]
 pub enum Error {
     /// An error from the `hyper` crate.
+    #[cfg(feature = "hyper")]
     Hyper(HyperError),
     /// An error from the `std::io` module.
     Io(IoError),
@@ -26,10 +31,16 @@ pub enum Error {
     Json(JsonError),
     /// A player already exists for the guild.
     PlayerAlreadyExists,
+    /// An error from the `reqwest` crate.
+    #[cfg(feature = "reqwest")]
+    Reqwest(ReqwestError),
     /// An error occurred sending a WebSocket message to an mpsc Receiver.
     ///
     /// This is the `Display` implementation of the error.
     Send(String),
+    /// An error from the `hyper` crate while parsing a URI.
+    #[cfg(feature = "hyper")]
+    Uri(UriError),
     /// An error occurred while parsing a URI.
     UriParse(ParseError),
     /// An error from the `websocket` crate.
@@ -45,17 +56,23 @@ impl Display for Error {
 impl StdError for Error {
     fn description(&self) -> &str {
         match *self {
+            #[cfg(feature = "hyper")]
             Error::Hyper(ref inner) => inner.description(),
             Error::Io(ref inner) => inner.description(),
             Error::Json(ref inner) => inner.description(),
             Error::PlayerAlreadyExists => "Player already exists for the guild",
+            #[cfg(feature = "reqwest")]
+            Error::Reqwest(ref inner) => inner.description(),
             Error::Send(ref inner) => inner,
+            #[cfg(feature = "hyper")]
+            Error::Uri(ref inner) => inner.description(),
             Error::UriParse(ref inner) => inner.description(),
             Error::WebSocket(ref inner) => inner.description(),
         }
     }
 }
 
+#[cfg(feature = "hyper")]
 impl From<HyperError> for Error {
     fn from(err: HyperError) -> Self {
         Error::Hyper(err)
@@ -80,9 +97,23 @@ impl From<ParseError> for Error {
     }
 }
 
+#[cfg(feature = "reqwest")]
+impl From<ReqwestError> for Error {
+    fn from(err: ReqwestError) -> Self {
+        Error::Reqwest(err)
+    }
+}
+
 impl<T> From<SendError<T>> for Error {
     fn from(err: SendError<T>) -> Self {
         Error::Send(format!("{}", err))
+    }
+}
+
+#[cfg(feature = "hyper")]
+impl From<UriError> for Error {
+    fn from(err: UriError) -> Self {
+        Error::Uri(err)
     }
 }
 

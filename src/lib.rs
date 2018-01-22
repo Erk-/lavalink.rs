@@ -43,11 +43,17 @@
 #[macro_use] extern crate serde_derive;
 
 extern crate evzht9h3nznqzwl as websocket;
-extern crate hyper;
 extern crate parking_lot;
 extern crate percent_encoding;
 extern crate serde;
 extern crate serde_json;
+
+#[cfg(feature = "futures")]
+extern crate futures;
+#[cfg(feature = "hyper")]
+extern crate hyper;
+#[cfg(feature = "reqwest")]
+extern crate reqwest;
 
 pub mod listener;
 pub mod model;
