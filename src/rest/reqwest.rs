@@ -3,7 +3,6 @@ use reqwest::header::{ContentType, Headers};
 use reqwest::{Body, Client as ReqwestClient, Method, Request, RequestBuilder};
 use serde_json;
 use std::io::Read;
-use std::ops::Deref;
 use super::LoadedTrack;
 use ::Result;
 
@@ -34,13 +33,20 @@ impl RestClient {
             password: password.into(),
         }
     }
-}
 
-impl Deref for RestClient {
-    type Target = ReqwestClient;
+    pub fn load_tracks<T: AsRef<str>>(&self, identifier: T)
+        -> Result<Vec<LoadedTrack>> {
+        self.client.load_tracks(&self.host, &self.password, identifier)
+    }
 
-    fn deref(&self) -> &Self::Target {
-        &self.client
+    pub fn decode_track<T: Into<String>>(&self, track: T)
+        -> Result<LoadedTrack> {
+        self.client.decode_track(&self.host, &self.password, track)
+    }
+
+    pub fn decode_tracks<T, It>(&self, tracks: It) -> Result<Vec<LoadedTrack>>
+        where T: Into<Vec<u8>>, It: IntoIterator<Item = T> {
+        self.client.decode_tracks(&self.host, &self.password, tracks)
     }
 }
 
