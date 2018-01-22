@@ -4,7 +4,7 @@ pub mod hyper;
 pub mod reqwest;
 
 /// Meta information about a loaded track.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct LoadedTrackInfo {
     /// The title of the track.
     pub title: String,
@@ -27,7 +27,7 @@ pub struct LoadedTrackInfo {
 }
 
 /// Information about a track.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct LoadedTrack {
     /// Base64 encoded representation of the track.
     pub track: String,
