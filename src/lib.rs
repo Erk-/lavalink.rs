@@ -47,6 +47,8 @@ extern crate parking_lot;
 extern crate percent_encoding;
 extern crate serde;
 extern crate serde_json;
+extern crate base64;
+extern crate byteorder;
 
 #[cfg(feature = "futures")]
 extern crate futures;
@@ -61,6 +63,7 @@ pub mod opcodes;
 pub mod player;
 pub mod rest;
 pub mod stats;
+pub mod decoder;
 
 mod error;
 mod prelude;

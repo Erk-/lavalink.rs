@@ -6,6 +6,8 @@ use std::result::Result as StdResult;
 use std::sync::mpsc::SendError;
 use websocket::client::ParseError;
 use websocket::WebSocketError;
+use std::string::FromUtf8Error;
+use base64::DecodeError;
 
 #[cfg(feature = "hyper")]
 use hyper::error::{Error as HyperError, UriError};
@@ -45,6 +47,10 @@ pub enum Error {
     UriParse(ParseError),
     /// An error from the `websocket` crate.
     WebSocket(WebSocketError),
+    /// An error parsing a UTF-8 String with `String::from_utf8`.
+    ParseUtf8(FromUtf8Error),
+    /// An error from the `base64` crate while decoding.
+    Base64Error(DecodeError),
 }
 
 impl Display for Error {
@@ -68,6 +74,8 @@ impl StdError for Error {
             Error::Uri(ref inner) => inner.description(),
             Error::UriParse(ref inner) => inner.description(),
             Error::WebSocket(ref inner) => inner.description(),
+            Error::ParseUtf8(ref inner) => inner.description(),
+            Error::Base64Error(ref inner) => inner.description(),
         }
     }
 }
@@ -120,5 +128,17 @@ impl From<UriError> for Error {
 impl From<WebSocketError> for Error {
     fn from(err: WebSocketError) -> Self {
         Error::WebSocket(err)
+    }
+}
+
+impl From<FromUtf8Error> for Error {
+    fn from(error: FromUtf8Error) -> Self {
+        Error::ParseUtf8(error)
+    }
+}
+
+impl From<DecodeError> for Error {
+    fn from(error: DecodeError) -> Self {
+        Error::Base64Error(error)
     }
 }
