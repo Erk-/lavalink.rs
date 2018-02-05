@@ -71,11 +71,6 @@ pub fn decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
     };
 
     let source = read_string(&mut cursor)?;
-    println!("source: {}", source);
-
-    let mut buf = Vec::new();
-    cursor.read_to_end(&mut buf)?;
-    println!("{:?}", buf);
 
     Ok(DecodedTrack {
         version, title, author, length, identifier, stream, url, source
