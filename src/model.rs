@@ -1,10 +1,7 @@
 //! A collection of messages to send to and receive from the LavaLink node.
 
-use serde_json;
 use serde::Serializer;
 use super::opcodes::Opcode;
-use websocket::OwnedMessage;
-use ::prelude::*;
 use std::result::Result as StdResult;
 
 /// Message used to connect a new player.
@@ -395,12 +392,6 @@ impl Volume {
     }
 }
 
-/// Used to convert a message into a JSON serialized WebSocket message.
-pub trait IntoWebSocketMessage {
-    /// Converted a message into a JSON serialized WebSocket message.
-    fn into_ws_message(self) -> Result<OwnedMessage>;
-}
-
 /// Utility function to serialize Option<u64> with no present value as 0 instead of null
 fn serialize_option_u64<S: Serializer>(option: &Option<u64>, s: S) -> StdResult<S::Ok, S::Error> {
     let value = match *option {
@@ -419,16 +410,6 @@ macro_rules! impl_stuff_for_model {
                 /// Retrieves the opcode for the model.
                 pub fn opcode(&self) -> Opcode {
                     self.op.clone()
-                }
-            }
-
-            impl IntoWebSocketMessage for $model {
-                /// Serializes the model into a JSON string, wrapping it in an
-                /// owned WebSocket message.
-                fn into_ws_message(self) -> Result<OwnedMessage> {
-                    serde_json::to_string(&self)
-                        .map(OwnedMessage::Text)
-                        .map_err(From::from)
                 }
             }
         )*

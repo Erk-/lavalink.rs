@@ -4,8 +4,6 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::io::Error as IoError;
 use std::result::Result as StdResult;
 use std::sync::mpsc::SendError;
-use websocket::client::ParseError;
-use websocket::WebSocketError;
 use std::string::FromUtf8Error;
 use base64::DecodeError;
 
@@ -43,10 +41,6 @@ pub enum Error {
     /// An error from the `hyper` crate while parsing a URI.
     #[cfg(feature = "hyper")]
     Uri(UriError),
-    /// An error occurred while parsing a URI.
-    UriParse(ParseError),
-    /// An error from the `websocket` crate.
-    WebSocket(WebSocketError),
     /// An error parsing a UTF-8 String with `String::from_utf8`.
     ParseUtf8(FromUtf8Error),
     /// An error from the `base64` crate while decoding.
@@ -72,8 +66,6 @@ impl StdError for Error {
             Error::Send(ref inner) => inner,
             #[cfg(feature = "hyper")]
             Error::Uri(ref inner) => inner.description(),
-            Error::UriParse(ref inner) => inner.description(),
-            Error::WebSocket(ref inner) => inner.description(),
             Error::ParseUtf8(ref inner) => inner.description(),
             Error::Base64Error(ref inner) => inner.description(),
         }
@@ -99,12 +91,6 @@ impl From<JsonError> for Error {
     }
 }
 
-impl From<ParseError> for Error {
-    fn from(err: ParseError) -> Self {
-        Error::UriParse(err)
-    }
-}
-
 #[cfg(feature = "reqwest")]
 impl From<ReqwestError> for Error {
     fn from(err: ReqwestError) -> Self {
@@ -122,12 +108,6 @@ impl<T> From<SendError<T>> for Error {
 impl From<UriError> for Error {
     fn from(err: UriError) -> Self {
         Error::Uri(err)
-    }
-}
-
-impl From<WebSocketError> for Error {
-    fn from(err: WebSocketError) -> Self {
-        Error::WebSocket(err)
     }
 }
 

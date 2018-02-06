@@ -1,10 +1,10 @@
 use parking_lot::Mutex;
+use serde_json;
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::sync::mpsc::Sender;
 use std::sync::Arc;
-use super::model::{IntoWebSocketMessage, Pause, Play, Stop, Volume};
-use websocket::OwnedMessage;
+use super::model::{Pause, Play, Stop, Volume};
 use ::prelude::*;
 use ::listener::AudioPlayerListener;
 
@@ -14,7 +14,7 @@ type AudioPlayerMap = HashMap<u64, Arc<Mutex<AudioPlayer>>>;
 // where mutablity should not be nessesary for non state fields
 #[derive(Clone)]
 pub struct AudioPlayer {
-    pub sender: Arc<Mutex<Sender<OwnedMessage>>>,
+    pub sender: Arc<Mutex<Sender<Vec<u8>>>>,
     pub guild_id: u64,
     pub track: Option<String>,
     pub time: i64,
@@ -25,7 +25,7 @@ pub struct AudioPlayer {
 }
 
 impl AudioPlayer {
-    fn new(sender: Arc<Mutex<Sender<OwnedMessage>>>, guild_id: u64, listener: Arc<AudioPlayerListener>) -> Self {
+    fn new(sender: Arc<Mutex<Sender<Vec<u8>>>>, guild_id: u64, listener: Arc<AudioPlayerListener>) -> Self {
         Self {
             sender,
             guild_id,
@@ -39,7 +39,7 @@ impl AudioPlayer {
     }
 
     #[inline]
-    fn send(&self, message: OwnedMessage) -> Result<()> {
+    fn send(&self, message: Vec<u8>) -> Result<()> {
         self.sender.lock().send(message).map_err(From::from)
     }
 
@@ -49,12 +49,12 @@ impl AudioPlayer {
         start_time: Option<u64>,
         end_time: Option<u64>,
     ) -> Result<()> {
-        let result = self.send(Play::new(
+        let result = self.send(serde_json::to_vec(&Play::new(
             &self.guild_id.to_string()[..],
             track,
             start_time,
             end_time,
-        ).into_ws_message()?);
+        ))?);
 
         match result {
             Ok(_) => {
@@ -72,9 +72,9 @@ impl AudioPlayer {
     }
 
     pub fn stop(&mut self) -> Result<()> {
-        let result = self.send(Stop::new(
+        let result = self.send(serde_json::to_vec(&Stop::new(
             &self.guild_id.to_string()[..],
-        ).into_ws_message()?);
+        ))?);
 
         match result {
             Ok(_) => {
@@ -95,10 +95,10 @@ impl AudioPlayer {
     }
 
     pub fn pause(&mut self, pause: bool) -> Result<()> {
-        let result = self.send(Pause::new(
+        let result = self.send(serde_json::to_vec(&Pause::new(
             &self.guild_id.to_string()[..],
             pause,
-        ).into_ws_message()?);
+        ))?);
 
         match result {
             Ok(_) => {
@@ -128,10 +128,10 @@ impl AudioPlayer {
     }
 
     pub fn volume(&mut self, volume: i32) -> Result<()> {
-        let result = self.send(Volume::new(
+        let result = self.send(serde_json::to_vec(&Volume::new(
             &self.guild_id.to_string()[..],
             volume,
-        ).into_ws_message()?);
+        ))?);
 
         match result {
             Ok(_) => {
@@ -177,7 +177,7 @@ impl AudioPlayerManager {
     }
 
     // utility assosiated function for creating AudioPlayer instances wrapped in Arc & Mutex
-    fn new_player(&self, sender: Arc<Mutex<Sender<OwnedMessage>>>, guild_id: u64) -> Arc<Mutex<AudioPlayer>> {
+    fn new_player(&self, sender: Arc<Mutex<Sender<Vec<u8>>>>, guild_id: u64) -> Arc<Mutex<AudioPlayer>> {
         Arc::new(Mutex::new(AudioPlayer::new(sender, guild_id, self.listener.clone())))
     }
 
@@ -194,7 +194,7 @@ impl AudioPlayerManager {
         Some(Arc::clone(player))
     }
 
-    pub fn create_player(&mut self, sender: Arc<Mutex<Sender<OwnedMessage>>>, guild_id: u64) -> Result<Arc<Mutex<AudioPlayer>>> {
+    pub fn create_player(&mut self, sender: Arc<Mutex<Sender<Vec<u8>>>>, guild_id: u64) -> Result<Arc<Mutex<AudioPlayer>>> {
         // we dont use #has_key yet because it would get its own players clone & mutex lock
         if self.players.contains_key(&guild_id) {
             return Err(Error::PlayerAlreadyExists);
