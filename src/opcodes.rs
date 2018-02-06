@@ -11,28 +11,10 @@ use std::string::ToString;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Opcode {
-    /// Makes the server queue a voice connection.
-    ///
-    /// This is sent by the client to the server.
-    Connect,
-    /// Makes the server close a voice connection.
-    ///
-    /// This is sent by the client to the server.
-    Disconnect,
     /// Indicates that the server emitted an event.
     ///
     /// This is sent by the server to the client.
     Event,
-    /// Request used to check if a shard is connected.
-    ///
-    /// This is sent by the server to the client.
-    IsConnectedReq,
-    /// Sent in response to a [`IsConnectedReq`].
-    ///
-    /// This is sent by the client to the server.
-    ///
-    /// [`IsConnectedReq`]: #variant.IsConnectedReq
-    IsConnectedRes,
     /// Sets the pause state of a guild's player.
     ///
     /// This is sent by the client to the server.
@@ -49,11 +31,6 @@ pub enum Opcode {
     ///
     /// This is sent by the client to the server.
     Seek,
-    /// A WebSocket message payload to forward to the shard's WebSocket for
-    /// sending.
-    ///
-    /// This is sent by the server to the client.
-    SendWS,
     /// A set of statistics collected once a minute.
     ///
     /// This is sent by the server to the client.
@@ -64,17 +41,6 @@ pub enum Opcode {
     Stop,
     /// An unknown opcode.
     Unknown,
-    /// Request to check if the voice channel and/or guild exists and that the
-    /// client has access to the voice channel.
-    ///
-    /// This is sent by the server to the client.
-    ValidationReq,
-    /// A response to a [`ValidationReq`] containing the received `guild_id`
-    /// and potentially `channel_id`, containing a `valid` with a boolean
-    /// indicating whether the combination is valid.
-    ///
-    /// This is sent by the client to the server.
-    ValidationRes,
     /// A voice state update received from Discord to be forwarded.
     ///
     /// This is sent by the client to the server.
@@ -91,21 +57,14 @@ impl ToString for Opcode {
         use self::Opcode::*;
 
         match *self {
-            Connect => "connect",
-            Disconnect => "disconnect",
             Event => "event",
-            IsConnectedReq => "isConnectedReq",
-            IsConnectedRes => "isConnectedRes",
             Pause => "pause",
             Play => "play",
             PlayerUpdate => "playerUpdate",
             Seek => "seek",
-            SendWS => "sendWS",
             Stats => "stats",
             Stop => "stop",
             Unknown => "unknown",
-            ValidationReq => "validationReq",
-            ValidationRes => "validationRes",
             VoiceUpdate => "voiceUpdate",
             Volume => "volume",
         }.to_owned()
@@ -119,19 +78,12 @@ impl FromStr for Opcode {
         use self::Opcode::*;
 
         Ok(match s {
-            "connect" => Connect,
             "voiceUpdate" => VoiceUpdate,
-            "disconnect" => Disconnect,
-            "validationReq" => ValidationReq,
-            "validationRes" => ValidationRes,
-            "isConnectedReq" => IsConnectedReq,
-            "isConnectedRes" => IsConnectedRes,
             "play" => Play,
             "stop" => Stop,
             "pause" => Pause,
             "seek" => Seek,
             "volume" => Volume,
-            "sendWS" => SendWS,
             "playerUpdate" => PlayerUpdate,
             "stats" => Stats,
             "event" => Event,

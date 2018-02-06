@@ -4,95 +4,6 @@ use serde::Serializer;
 use super::opcodes::Opcode;
 use std::result::Result as StdResult;
 
-/// Message used to connect a new player.
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Connect {
-    /// The ID of the channel being connected to.
-    pub channel_id: String,
-    /// The ID of the guild being connected to.
-    pub guild_id: String,
-    op: Opcode,
-}
-
-impl Connect {
-    /// Creates a new `Connect` message.
-    ///
-    /// # Examples
-    ///
-    /// ```rust,no_run
-    /// use lavalink::model::Connect;
-    ///
-    /// let _msg = Connect::new("381880193700069380", "381880193251409931");
-    /// ```
-    pub fn new<S: Into<String>>(guild_id: S, channel_id: S) -> Self {
-        Self {
-            channel_id: channel_id.into(),
-            guild_id: guild_id.into(),
-            op: Opcode::Connect,
-        }
-    }
-}
-
-/// Message used to disconnect a player.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Disconnect {
-    /// The ID of the guild being disconnected from.
-    pub guild_id: String,
-    op: Opcode,
-}
-
-impl Disconnect {
-    /// Creates a new `Disconnect` message.
-    ///
-    /// # Examples
-    ///
-    /// ```rust,no_run
-    /// use lavalink::model::Disconnect;
-    ///
-    /// let _msg = Disconnect::new("381880193251409931");
-    /// ```
-    pub fn new<S: Into<String>>(guild_id: S) -> Self {
-        Self {
-            guild_id: guild_id.into(),
-            op: Opcode::Disconnect,
-        }
-    }
-}
-
-/// A response from the client to the node about whether a shard is connected.
-///
-/// This should be sent to the node in reply to a [`IsConnectedRequest`].
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct IsConnectedResponse {
-    /// Whether the shard is connected.
-    pub connected: bool,
-    op: Opcode,
-    /// The ID of the shard whose connection status is being confirmed.
-    pub shard_id: u64,
-}
-
-impl IsConnectedResponse {
-    /// Creates a new `IsConnectedResponse` message.
-    ///
-    /// # Examples
-    ///
-    /// ```rust,no_run
-    /// use lavalink::model::IsConnectedResponse;
-    ///
-    /// let _msg = IsConnectedResponse::new(5, true);
-    /// ```
-    pub fn new(shard_id: u64, connected: bool) -> Self {
-        Self {
-            op: Opcode::IsConnectedRes,
-            connected,
-            shard_id,
-        }
-    }
-}
-
 /// A message sent to a node to modify the pause state a guild's player.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -238,78 +149,6 @@ impl Stop {
     }
 }
 
-/// A message sent to a node in response to a received [`ValidationRequest`]
-/// message.
-///
-/// **Note**: If the received [`ValidationRequest::channel_id`] is `None`, then
-/// the response's [`channel_id`] must be `None` as well. Otherwise, the same
-/// ID received must be sent in reply.
-///
-/// # Examples
-///
-/// If a `ValidationRequest` with a `channel_id` like so is received (in JSON
-/// form):
-///
-/// ```json
-/// {
-///   "channel_id": "381880193700069380",
-///   "guild_id": "381880193251409931",
-///   // ...
-/// }
-/// ```
-///
-/// Then the following message must be constructed, noting the `channel_id`
-/// parameter:
-///
-/// ```rust,no_run
-/// use lavalink::model::ValidationResponse;
-///
-/// let guild_id = "381880193251409931";
-/// let channel_id = Some("381880193700069380");
-///
-/// // Note that `valid`'s boolean value is variant on your program's state.
-/// let _msg = ValidationResponse::new(guild_id, channel_id, true);
-/// ```
-///
-/// [`ValidationRequest`]: struct.ValidationRequest.html
-/// [`ValidationRequest::channel_id`]: struct.ValidationRequest.html#structfield.channel_id
-/// [`channel_id`]: #structfield.channel_id
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ValidationResponse {
-    /// The ID of the channel being validated.
-    pub channel_id: Option<String>,
-    /// The ID of the guild being validated.
-    pub guild_id: String,
-    op: Opcode,
-    /// Whether the guild ID, and potentially channel ID, combination is valid.
-    pub valid: bool,
-}
-
-impl ValidationResponse {
-    /// Creates a new `ValidationResponse` message.
-    ///
-    /// # Examples
-    ///
-    /// Create a new message with no channel ID present, describing the guild as
-    /// being invalid:
-    ///
-    /// ```rust,no_run
-    /// use lavalink::model::ValidationResponse;
-    ///
-    /// let _msg = ValidationResponse::new("381880193251409931", None, false);
-    /// ```
-    pub fn new<S>(guild_id: S, channel_id: Option<S>, valid: bool) -> Self
-        where S: Into<String> {
-        Self {
-            channel_id: channel_id.map(Into::into),
-            guild_id: guild_id.into(),
-            op: Opcode::ValidationRes,
-            valid,
-        }
-    }
-}
-
 /// A message sent to a node, relaying a voice state update received from
 /// Discord.
 #[derive(Deserialize, Serialize)]
@@ -417,14 +256,10 @@ macro_rules! impl_stuff_for_model {
 }
 
 impl_stuff_for_model! {
-    Connect,
-    Disconnect,
-    IsConnectedResponse,
     Pause,
     Play,
     Seek,
     Stop,
-    ValidationResponse,
     VoiceUpdate,
     Volume
 }
