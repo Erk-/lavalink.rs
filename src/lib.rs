@@ -38,8 +38,6 @@
 //! [lavalink]: https://github.com/Frederikam/Lavalink
 //! [license]: https://github.com/serenity-rs/lavalink.rs/blob/master/LICENSE.md
 
-
-#[macro_use] extern crate log;
 #[macro_use] extern crate serde_derive;
 
 extern crate parking_lot;
@@ -56,10 +54,8 @@ extern crate hyper;
 #[cfg(feature = "reqwest")]
 extern crate reqwest;
 
-pub mod listener;
 pub mod model;
 pub mod opcodes;
-pub mod player;
 pub mod rest;
 pub mod stats;
 pub mod decoder;
