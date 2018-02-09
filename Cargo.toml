@@ -11,6 +11,7 @@ repository = "https://github.com/serenity-rs/lavalink.rs.git"
 version = "0.1.0"
 
 [dependencies]
+log = "~0.4"
 parking_lot = "^0.5"
 percent-encoding = "^1.0"
 serde = "^1.0"
