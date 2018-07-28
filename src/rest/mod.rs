@@ -3,8 +3,37 @@ pub mod hyper;
 #[cfg(feature = "reqwest")]
 pub mod reqwest;
 
+/// Information about loaded tracks.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename = "camelCase")]
+pub struct Load {
+    /// The type of track load.
+    pub load_type: LoadType,
+    /// The playlist information.
+    pub playlist_info: Option<PlaylistInfo>,
+    /// The list of tracks.
+    pub tracks: Vec<LoadedTrack>,
+}
+
+/// The type of a track load.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename = "SCREAMING_SNAKE_CASE")]
+pub enum LoadType {
+    /// Indicator that loading the track failed.
+    LoadFailed,
+    /// Indicator that no matches were found.
+    NoMatches,
+    /// Indicator that a playlist item was loaded.
+    PlaylistLoaded,
+    /// Indicator that a search was made.
+    SearchResult,
+    /// Indicator that loading a track succeeded.
+    TrackLoaded,
+}
+
 /// Meta information about a loaded track.
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename = "camelCase")]
 pub struct LoadedTrackInfo {
     /// The title of the track.
     pub title: String,
@@ -17,10 +46,8 @@ pub struct LoadedTrackInfo {
     /// The URI to the track.
     pub uri: String,
     /// Whether the track is a stream.
-    #[serde(rename = "isStream")]
     pub is_stream: bool,
     /// Whether the track can be seeked.
-    #[serde(rename = "isSeekable")]
     pub is_seekable: bool,
     /// The current position in the track.
     pub position: i64,
@@ -33,4 +60,14 @@ pub struct LoadedTrack {
     pub track: String,
     /// Meta information about the track.
     pub info: LoadedTrackInfo,
+}
+
+/// Information about a playlist, if any.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename = "camelCase")]
+pub struct PlaylistInfo {
+    /// The name of the playlist.
+    pub name: String,
+    /// The item that was selected.
+    pub selected_track: u64,
 }

@@ -69,7 +69,7 @@ pub trait LavalinkRestRequester {
 
 impl LavalinkRestRequester for ReqwestClient {
     fn load_tracks<S, T, U>(&self, host: S, password: T, identifier: U)
-        -> Result<Vec<LoadedTrack>>
+        -> Result<Load>
         where S: AsRef<str>, T: AsRef<[u8]>, U: AsRef<str> {
         let identifier = identifier.as_ref();
 
