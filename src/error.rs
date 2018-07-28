@@ -7,8 +7,13 @@ use std::sync::mpsc::SendError;
 use std::string::FromUtf8Error;
 use base64::DecodeError;
 
+#[cfg(feature = "http")]
+use http::{
+    uri::InvalidUri,
+    Error as HttpError,
+};
 #[cfg(feature = "hyper")]
-use hyper::error::{Error as HyperError, UriError};
+use hyper::error::Error as HyperError;
 #[cfg(feature = "reqwest")]
 use reqwest::Error as ReqwestError;
 
@@ -22,6 +27,9 @@ pub type Result<T> = StdResult<T, Error>;
 /// Common error type used throughout the library's return types.
 #[derive(Debug)]
 pub enum Error {
+    /// An error from the `http` crate.
+    #[cfg(feature = "http")]
+    Http(HttpError),
     /// An error from the `hyper` crate.
     #[cfg(feature = "hyper")]
     Hyper(HyperError),
@@ -39,8 +47,8 @@ pub enum Error {
     /// This is the `Display` implementation of the error.
     Send(String),
     /// An error from the `hyper` crate while parsing a URI.
-    #[cfg(feature = "hyper")]
-    Uri(UriError),
+    #[cfg(feature = "http")]
+    Uri(InvalidUri),
     /// An error parsing a UTF-8 String with `String::from_utf8`.
     ParseUtf8(FromUtf8Error),
     /// An error from the `base64` crate while decoding.
@@ -56,6 +64,8 @@ impl Display for Error {
 impl StdError for Error {
     fn description(&self) -> &str {
         match *self {
+            #[cfg(feature = "http")]
+            Error::Http(ref inner) => inner.description(),
             #[cfg(feature = "hyper")]
             Error::Hyper(ref inner) => inner.description(),
             Error::Io(ref inner) => inner.description(),
@@ -64,11 +74,18 @@ impl StdError for Error {
             #[cfg(feature = "reqwest")]
             Error::Reqwest(ref inner) => inner.description(),
             Error::Send(ref inner) => inner,
-            #[cfg(feature = "hyper")]
+            #[cfg(feature = "http")]
             Error::Uri(ref inner) => inner.description(),
             Error::ParseUtf8(ref inner) => inner.description(),
             Error::Base64Error(ref inner) => inner.description(),
         }
+    }
+}
+
+#[cfg(feature = "http")]
+impl From<HttpError> for Error {
+    fn from(err: HttpError) -> Self {
+        Error::Http(err)
     }
 }
 
@@ -104,9 +121,9 @@ impl<T> From<SendError<T>> for Error {
     }
 }
 
-#[cfg(feature = "hyper")]
-impl From<UriError> for Error {
-    fn from(err: UriError) -> Self {
+#[cfg(feature = "http")]
+impl From<InvalidUri> for Error {
+    fn from(err: InvalidUri) -> Self {
         Error::Uri(err)
     }
 }

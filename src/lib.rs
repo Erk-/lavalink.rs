@@ -50,6 +50,8 @@ extern crate byteorder;
 
 #[cfg(feature = "futures")]
 extern crate futures;
+#[cfg(feature = "http")]
+extern crate http;
 #[cfg(feature = "hyper")]
 extern crate hyper;
 #[cfg(feature = "reqwest")]
