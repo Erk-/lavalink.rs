@@ -173,9 +173,9 @@ impl VoiceUpdate {
 
         Self {
             event: VoiceUpdateEvent {
-                endpoint: endpoint,
                 guild_id: guild_id.clone(),
-                token: token,
+                endpoint,
+                token,
             },
             op: Opcode::VoiceUpdate,
             session_id: session_id.into(),

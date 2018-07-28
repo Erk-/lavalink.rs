@@ -1,6 +1,6 @@
-use ::prelude::Result;
-use std::io::*;
-use byteorder::*;
+use byteorder::{BE, ReadBytesExt};
+use std::io::{Cursor, Read};
+use Result;
 
 const TRACK_INFO_VERSIONED: i32 = 1;
 
@@ -12,10 +12,11 @@ macro_rules! move_cursor {
 }
 
 fn read_string(cursor: &mut Cursor<Vec<u8>>) -> Result<String> {
-    let size = cursor.read_u16::<BigEndian>()?;
+    let size = cursor.read_u16::<BE>()?;
     let mut buf = vec![0u8; size as usize];
     cursor.read_exact(&mut buf)?;
     let string = String::from_utf8(buf)?;
+
     Ok(string)
 }
 
@@ -37,7 +38,7 @@ pub fn decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
     let mut cursor = Cursor::new(input);
 
     let value = cursor.read_u8()?;
-    let flags = ((value as i64 & 0xC0000000) >> 30) as i32;
+    let flags = ((i64::from(value) & 0xC000_0000) >> 30) as i32;
 
     // gets the message size (we dont care)
     // let size = value as i32 & 0x3FFFFFFF;
@@ -46,17 +47,14 @@ pub fn decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
 
     let version = match flags & TRACK_INFO_VERSIONED {
         0 => 1,
-        _ => cursor.read_u8()? & 0xFF
-    } as u8;
+        _ => cursor.read_u8()?,
+    };
 
     move_cursor!(cursor, 2); // dont care
 
     let title = read_string(&mut cursor)?;
-
     let author = read_string(&mut cursor)?;
-
-    let length = cursor.read_u64::<BigEndian>()?;
-
+    let length = cursor.read_u64::<BE>()?;
     let identifier = read_string(&mut cursor)?;
 
     let stream = cursor.read_u8()? == 1;
@@ -65,7 +63,7 @@ pub fn decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
     let url = if has_url {
         Some(read_string(&mut cursor)?)
     } else {
-        let size = cursor.read_u8()? as u64;
+        let size = u64::from(cursor.read_u8()?);
         move_cursor!(cursor, size);
         None
     };
@@ -73,7 +71,14 @@ pub fn decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
     let source = read_string(&mut cursor)?;
 
     Ok(DecodedTrack {
-        version, title, author, length, identifier, stream, url, source
+        author,
+        identifier,
+        length,
+        source,
+        stream,
+        title,
+        url,
+        version,
     })
 }
 
