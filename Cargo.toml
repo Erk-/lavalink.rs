@@ -11,7 +11,6 @@ repository = "https://github.com/serenity-rs/lavalink.rs.git"
 version = "0.1.0"
 
 [dependencies]
-log = "0.4"
 percent-encoding = "^1.0"
 serde = "^1.0"
 serde_json = "^1.0"
@@ -31,6 +30,10 @@ version = "0.1"
 optional = true
 version = "~0.12"
 
+[dependencies.log]
+optional = true
+version = "0.4"
+
 [dependencies.reqwest]
 optional = true
 version = "~0.8"
@@ -38,4 +41,4 @@ version = "~0.8"
 [features]
 default = ["hyper-support"]
 hyper-support = ["futures", "http", "hyper"]
-reqwest-support = ["reqwest"]
+reqwest-support = ["log", "reqwest"]
