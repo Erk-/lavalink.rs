@@ -3,7 +3,7 @@ use reqwest::header::{ContentType, Headers};
 use reqwest::{Body, Client as ReqwestClient, Method, Request, RequestBuilder};
 use serde_json;
 use std::io::Read;
-use super::LoadedTrack;
+use super::{Load, LoadedTrack};
 use ::Result;
 
 /// An HTTP client used to communicate with a LavaLink node.
@@ -40,11 +40,11 @@ impl RestClient {
 
     #[inline]
     pub fn load_tracks(&self, identifier: impl AsRef<str>)
-        -> Result<Vec<LoadedTrack>> {
+        -> Result<Load> {
         self._load_tracks(identifier.as_ref())
     }
 
-    fn _load_tracks(&self, identifier: &str) -> Result<Vec<LoadedTrack>> {
+    fn _load_tracks(&self, identifier: &str) -> Result<Load> {
         self.client.load_tracks(&self.host, &self.password, identifier)
     }
 
@@ -79,7 +79,7 @@ pub trait LavalinkRestRequester {
         host: impl AsRef<str>,
         password: impl AsRef<[u8]>,
         identifier: impl AsRef<str>,
-    ) -> Result<Vec<LoadedTrack>>;
+    ) -> Result<Load>;
 
     fn decode_track(
         &self,
@@ -103,7 +103,7 @@ impl LavalinkRestRequester for ReqwestClient {
         host: impl AsRef<str>,
         password: impl AsRef<[u8]>,
         identifier: impl AsRef<str>,
-    ) -> Result<Vec<LoadedTrack>> {
+    ) -> Result<Load> {
         load_tracks(
             self,
             host.as_ref(),
@@ -197,7 +197,7 @@ fn load_tracks(
     host: &str,
     password: &[u8],
     identifier: &str,
-) -> Result<Vec<LoadedTrack>> {
+) -> Result<Load> {
     // url encoding the identifier
     let identifier = percent_encoding::utf8_percent_encode(
         identifier,

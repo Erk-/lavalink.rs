@@ -6,7 +6,7 @@ use percent_encoding::{self, DEFAULT_ENCODE_SET};
 use serde::de::DeserializeOwned;
 use serde_json;
 use std::str::FromStr;
-use super::LoadedTrack;
+use super::{Load, LoadedTrack};
 use ::{Error, Result};
 
 pub trait LavalinkRestRequester {
@@ -15,7 +15,7 @@ pub trait LavalinkRestRequester {
         host: impl AsRef<str>,
         password: impl AsRef<[u8]>,
         identifier: impl AsRef<str>,
-    ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>>;
+    ) -> Box<Future<Item = Load, Error = Error>>;
 
     fn decode_track(
         &self,
@@ -38,7 +38,7 @@ impl<C: Connect + 'static> LavalinkRestRequester for Client<C, Body> {
         host: impl AsRef<str>,
         password: impl AsRef<[u8]>,
         identifier: impl AsRef<str>,
-    ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
+    ) -> Box<Future<Item = Load, Error = Error>> {
         load_tracks(
             &self,
             host.as_ref(),
@@ -137,7 +137,7 @@ fn load_tracks<C: Connect + 'static>(
     host: &str,
     password: &[u8],
     identifier: &str,
-) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
+) -> Box<Future<Item = Load, Error = Error>> {
     // url encoding the identifier
     let identifier = percent_encoding::utf8_percent_encode(
         identifier,
