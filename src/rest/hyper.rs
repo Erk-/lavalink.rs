@@ -10,104 +10,158 @@ use super::LoadedTrack;
 use ::{Error, Result};
 
 pub trait LavalinkRestRequester {
-    fn load_tracks<S, T, U>(&self, host: S, password: T, identifier: U)
-        -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: AsRef<str>;
+    fn load_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        identifier: impl AsRef<str>,
+    ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>>;
 
-    fn decode_track<S, T, U>(&self, host: S, password: T, track: U)
-        -> Box<Future<Item = LoadedTrack, Error = Error>>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: Into<String>;
+    fn decode_track(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        track: impl Into<String>,
+    ) -> Box<Future<Item = LoadedTrack, Error = Error>>;
 
-    fn decode_tracks<S, T, U, It>(&self, host: S, password: T, tracks: It)
-        -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>>
-        where S: AsRef<str>,
-              T: AsRef<[u8]>,
-              U: Into<Vec<u8>>,
-              It: IntoIterator<Item = U>;
+    fn decode_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        tracks: impl IntoIterator<Item = impl Into<Vec<u8>>>,
+    ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>>;
 }
 
 impl<C: Connect + 'static> LavalinkRestRequester for Client<C, Body> {
-    fn load_tracks<S, T, U>(&self, host: S, password: T, identifier: U)
-        -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: AsRef<str> {
-        let identifier = identifier.as_ref();
-
-        // url encoding the identifier
-        let identifier = percent_encoding::utf8_percent_encode(
-            identifier,
-            DEFAULT_ENCODE_SET,
-        );
-
-        let uri = format!("/loadtracks?identifier={}", identifier);
-        let request = create_request(
-            Method::GET,
-            uri.as_ref(),
-            None,
+    fn load_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        identifier: impl AsRef<str>,
+    ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
+        load_tracks(
+            &self,
             host.as_ref(),
             password.as_ref(),
-        );
-        let request = match request {
-            Ok(v) => v,
-            Err(why) => return Box::new(future::err(why)),
-        };
-
-        run_request(&self, request)
+            identifier.as_ref(),
+        )
     }
 
-    fn decode_track<S, T, U>(&self, host: S, password: T, track: U)
-        -> Box<Future<Item = LoadedTrack, Error = Error>>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: Into<String> {
-        let track = track.into();
-        let uri = format!("/decodetrack?track={}", track);
-        let request = create_request(
-            Method::GET,
-            uri.as_ref(),
-            None,
+    fn decode_track(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        track: impl Into<String>,
+    ) -> Box<Future<Item = LoadedTrack, Error = Error>> {
+        decode_track(
+            &self,
             host.as_ref(),
             password.as_ref(),
-        );
-        let request = match request {
-            Ok(v) => v,
-            Err(why) => return Box::new(future::err(why)),
-        };
-
-        Box::new(run_request(self, request)
-            .map(|info| {
-                LoadedTrack {
-                    info,
-                    track,
-                }
-            })
-            .from_err())
+            track.into(),
+        )
     }
 
-    fn decode_tracks<S, T, U, It>(&self, host: S, password: T, tracks: It)
-        -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>>
-        where S: AsRef<str>,
-              T: AsRef<[u8]>,
-              U: Into<Vec<u8>>,
-              It: IntoIterator<Item = U> {
-        let tracks = tracks.into_iter().map(|x| x.into()).collect::<Vec<_>>();
-        let tracks = match serde_json::to_vec(&tracks) {
-            Ok(tracks) => tracks,
-            Err(why) => return Box::new(future::err(Error::Json(why))),
-        };
-        let body = (tracks, HeaderValue::from_static("Application/json"));
-
-        let request = create_request(
-            Method::POST,
-            "/decodetracks",
-            Some(body),
+    fn decode_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        tracks: impl IntoIterator<Item = impl Into<Vec<u8>>>,
+    ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
+        decode_tracks(
+            self,
             host.as_ref(),
             password.as_ref(),
-        );
-        let request = match request {
-            Ok(v) => v,
-            Err(why) => return Box::new(future::err(why)),
-        };
-
-        run_request(&self, request)
+            tracks.into_iter().map(Into::into).collect(),
+        )
     }
+}
+
+fn decode_track<C: Connect + 'static>(
+    client: &Client<C, Body>,
+    host: &str,
+    password: &[u8],
+    track: String,
+) -> Box<Future<Item = LoadedTrack, Error = Error>> {
+    let track = track.into();
+    let uri = format!("/decodetrack?track={}", track);
+    let request = create_request(
+        Method::GET,
+        uri.as_ref(),
+        None,
+        host.as_ref(),
+        password.as_ref(),
+    );
+    let request = match request {
+        Ok(v) => v,
+        Err(why) => return Box::new(future::err(why)),
+    };
+
+    Box::new(run_request(client, request)
+        .map(|info| {
+            LoadedTrack {
+                info,
+                track,
+            }
+        })
+        .from_err())
+}
+
+fn decode_tracks<C: Connect + 'static>(
+    client: &Client<C, Body>,
+    host: &str,
+    password: &[u8],
+    tracks: Vec<Vec<u8>>,
+) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
+    let tracks = match serde_json::to_vec(&tracks) {
+        Ok(tracks) => tracks,
+        Err(why) => return Box::new(future::err(Error::Json(why))),
+    };
+    let body = (tracks, HeaderValue::from_static("Application/json"));
+
+    let request = create_request(
+        Method::POST,
+        "/decodetracks",
+        Some(body),
+        host.as_ref(),
+        password.as_ref(),
+    );
+    let request = match request {
+        Ok(v) => v,
+        Err(why) => return Box::new(future::err(why)),
+    };
+
+    run_request(client, request)
+}
+
+fn load_tracks<C: Connect + 'static>(
+    client: &Client<C, Body>,
+    host: &str,
+    password: &[u8],
+    identifier: &str,
+) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
+
+    let identifier = identifier.as_ref();
+
+    // url encoding the identifier
+    let identifier = percent_encoding::utf8_percent_encode(
+        identifier,
+        DEFAULT_ENCODE_SET,
+    );
+
+    let uri = format!("/loadtracks?identifier={}", identifier);
+    let request = create_request(
+        Method::GET,
+        uri.as_ref(),
+        None,
+        host.as_ref(),
+        password.as_ref(),
+    );
+    let request = match request {
+        Ok(v) => v,
+        Err(why) => return Box::new(future::err(why)),
+    };
+
+    run_request(client, request)
 }
 
 fn create_request(

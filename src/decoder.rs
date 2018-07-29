@@ -34,7 +34,12 @@ pub struct DecodedTrack {
 }
 
 /// Decodes a binary lavaplayer track blob
-pub fn decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
+#[inline]
+pub fn decode_track(input: impl Into<Vec<u8>>) -> Result<DecodedTrack> {
+    _decode_track(input.into())
+}
+
+fn _decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
     let mut cursor = Cursor::new(input);
 
     let value = cursor.read_u8()?;
@@ -82,7 +87,13 @@ pub fn decode_track(input: Vec<u8>) -> Result<DecodedTrack> {
     })
 }
 
-/// Decodes a base64 string lavaplayer track blob
-pub fn decode_track_base64(input: &str) -> Result<DecodedTrack> {
+/// Decodes a base64 string lavaplayer track blob.
+#[inline]
+pub fn decode_track_base64(input: impl AsRef<str>) -> Result<DecodedTrack> {
+    _decode_track_base64(input.as_ref())
+}
+
+#[inline]
+fn _decode_track_base64(input: &str) -> Result<DecodedTrack> {
     decode_track(::base64::decode(input)?)
 }

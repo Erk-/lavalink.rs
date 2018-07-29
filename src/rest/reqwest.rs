@@ -25,124 +25,199 @@ impl RestClient {
     ///
     /// let client = RestClient::new("127.0.0.1:2333", "test_password");
     /// ```
-    pub fn new<S, V>(host: S, password: V) -> Self
-        where S: Into<String>, V: Into<Vec<u8>> {
+    #[inline]
+    pub fn new(host: impl Into<String>, password: impl Into<Vec<u8>>) -> Self {
+        Self::_new(host.into(), password.into())
+    }
+
+    fn _new(host: String, password: Vec<u8>) -> Self {
         Self {
             client: ReqwestClient::new(),
-            host: host.into(),
-            password: password.into(),
+            host,
+            password,
         }
     }
 
-    pub fn load_tracks<T: AsRef<str>>(&self, identifier: T)
+    #[inline]
+    pub fn load_tracks(&self, identifier: impl AsRef<str>)
         -> Result<Vec<LoadedTrack>> {
+        self._load_tracks(identifier.as_ref())
+    }
+
+    fn _load_tracks(&self, identifier: &str) -> Result<Vec<LoadedTrack>> {
         self.client.load_tracks(&self.host, &self.password, identifier)
     }
 
-    pub fn decode_track<T: Into<String>>(&self, track: T)
-        -> Result<LoadedTrack> {
+    #[inline]
+    pub fn decode_track(
+        &self,
+        track: impl Into<String>,
+    ) -> Result<LoadedTrack> {
+        self._decode_track(track.into())
+    }
+
+    fn _decode_track(&self, track: String) -> Result<LoadedTrack> {
         self.client.decode_track(&self.host, &self.password, track)
     }
 
-    pub fn decode_tracks<T, It>(&self, tracks: It) -> Result<Vec<LoadedTrack>>
-        where T: Into<Vec<u8>>, It: IntoIterator<Item = T> {
+    #[inline]
+    pub fn decode_tracks<T, It>(
+        &self,
+        tracks: impl IntoIterator<Item = impl Into<Vec<u8>>>,
+    ) -> Result<Vec<LoadedTrack>> {
+        self._decode_tracks(tracks.into_iter().map(Into::into).collect())
+    }
+
+    fn _decode_tracks(&self, tracks: Vec<Vec<u8>>) -> Result<Vec<LoadedTrack>> {
         self.client.decode_tracks(&self.host, &self.password, tracks)
     }
 }
 
 pub trait LavalinkRestRequester {
-    fn load_tracks<S, T, U>(&self, host: S, password: T, identifier: U)
-        -> Result<Vec<LoadedTrack>>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: AsRef<str>;
+    fn load_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        identifier: impl AsRef<str>,
+    ) -> Result<Vec<LoadedTrack>>;
 
-    fn decode_track<S, T, U>(&self, host: S, password: T, track: U)
-        -> Result<LoadedTrack>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: Into<String>;
+    fn decode_track(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        track: impl Into<String>,
+    ) -> Result<LoadedTrack>;
 
-    fn decode_tracks<S, T, U, It>(&self, host: S, password: T, tracks: It)
-        -> Result<Vec<LoadedTrack>>
-        where S: AsRef<str>,
-              T: AsRef<[u8]>,
-              U: Into<Vec<u8>>,
-              It: IntoIterator<Item = U>;
+    fn decode_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        tracks: impl IntoIterator<Item = impl Into<Vec<u8>>>,
+    ) -> Result<Vec<LoadedTrack>>;
 }
 
 impl LavalinkRestRequester for ReqwestClient {
-    fn load_tracks<S, T, U>(&self, host: S, password: T, identifier: U)
-        -> Result<Load>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: AsRef<str> {
-        let identifier = identifier.as_ref();
-
-        // url encoding the identifier
-        let identifier = percent_encoding::utf8_percent_encode(
-            identifier,
-            DEFAULT_ENCODE_SET,
-        );
-
-        let uri = format!("/loadtracks?identifier={}", identifier);
-        let request = create_request(
-            &self,
-            Method::Get,
-            uri.as_ref(),
-            None,
+    #[inline]
+    fn load_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        identifier: impl AsRef<str>,
+    ) -> Result<Vec<LoadedTrack>> {
+        load_tracks(
+            self,
             host.as_ref(),
             password.as_ref(),
-        ).build()?;
-
-        run_request(&self, request)
-            .and_then(|body| serde_json::from_slice(&body).map_err(From::from))
-            .map_err(From::from)
+            identifier.as_ref(),
+        )
     }
 
-    fn decode_track<S, T, U>(&self, host: S, password: T, track: U)
-        -> Result<LoadedTrack>
-        where S: AsRef<str>, T: AsRef<[u8]>, U: Into<String> {
-        let track = track.into();
-        let uri = format!("/decodetrack?track={}", track);
-        let request = create_request(
-            &self,
-            Method::Get,
-            uri.as_ref(),
-            None,
+    #[inline]
+    fn decode_track(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        track: impl Into<String>,
+    ) -> Result<LoadedTrack> {
+        decode_track(
+            self,
             host.as_ref(),
             password.as_ref(),
-        ).build()?;
-
-        let response = run_request(&self, request)?;
-
-        let info = serde_json::from_slice(&response)?;
-
-        Ok(LoadedTrack {
-            track: track,
-            info,
-        })
+            track.into(),
+        )
     }
 
-    fn decode_tracks<S, T, U, It>(&self, host: S, password: T, tracks: It)
-        -> Result<Vec<LoadedTrack>>
-        where S: AsRef<str>,
-              T: AsRef<[u8]>,
-              U: Into<Vec<u8>>,
-              It: IntoIterator<Item = U> {
-        let tracks = tracks.into_iter().map(|x| x.into()).collect::<Vec<_>>();
-        let tracks = serde_json::to_vec(&tracks)?;
-        let body = (tracks, ContentType::json());
-
-        let request = create_request(
-            &self,
-            Method::Post,
-            "/decodetracks",
-            Some(body),
+    #[inline]
+    fn decode_tracks(
+        &self,
+        host: impl AsRef<str>,
+        password: impl AsRef<[u8]>,
+        tracks: impl IntoIterator<Item = impl Into<Vec<u8>>>,
+    ) -> Result<Vec<LoadedTrack>> {
+        decode_tracks(
+            self,
             host.as_ref(),
             password.as_ref(),
-        ).build()?;
-
-        run_request(&self, request)
-            .and_then(|resp| serde_json::from_slice(&resp).map_err(From::from))
-            .map_err(From::from)
+            tracks.into_iter().map(Into::into).collect(),
+        )
     }
 }
 
+fn decode_track(
+    client: &ReqwestClient,
+    host: &str,
+    password: &[u8],
+    track: String,
+) -> Result<LoadedTrack> {
+    let uri = format!("/decodetrack?track={}", track);
+    let request = create_request(
+        client,
+        Method::Get,
+        uri.as_ref(),
+        None,
+        host,
+        password,
+    ).build()?;
+
+    let response = run_request(client, request)?;
+
+    let info = serde_json::from_slice(&response)?;
+
+    Ok(LoadedTrack {
+        track: track,
+        info,
+    })
+}
+
+fn decode_tracks(
+    client: &ReqwestClient,
+    host: &str,
+    password: &[u8],
+    tracks: Vec<Vec<u8>>,
+) -> Result<Vec<LoadedTrack>> {
+    let tracks = serde_json::to_vec(&tracks)?;
+    let body = (tracks, ContentType::json());
+
+    let request = create_request(
+        client,
+        Method::Post,
+        "/decodetracks",
+        Some(body),
+        host.as_ref(),
+        password.as_ref(),
+    ).build()?;
+
+    run_request(client, request)
+        .and_then(|resp| serde_json::from_slice(&resp).map_err(From::from))
+        .map_err(From::from)
+}
+
+fn load_tracks(
+    client: &ReqwestClient,
+    host: &str,
+    password: &[u8],
+    identifier: &str,
+) -> Result<Vec<LoadedTrack>> {
+    // url encoding the identifier
+    let identifier = percent_encoding::utf8_percent_encode(
+        identifier,
+        DEFAULT_ENCODE_SET,
+    );
+
+    let uri = format!("/loadtracks?identifier={}", identifier);
+    let request = create_request(
+        client,
+        Method::Get,
+        uri.as_ref(),
+        None,
+        host,
+        password,
+    ).build()?;
+
+    run_request(client, request)
+        .and_then(|body| serde_json::from_slice(&body).map_err(From::from))
+        .map_err(From::from)
+}
 
 fn create_request<'a>(
     client: &'a ReqwestClient,

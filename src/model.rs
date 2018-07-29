@@ -27,10 +27,15 @@ impl Pause {
     ///
     /// let _msg = Pause::new("381880193251409931", true);
     /// ```
-    pub fn new<S: Into<String>>(guild_id: S, pause: bool) -> Self {
+    #[inline]
+    pub fn new(guild_id: impl Into<String>, pause: bool) -> Self {
+        Self::_new(guild_id.into(), pause)
+    }
+
+    fn _new(guild_id: String, pause: bool) -> Self {
         Self {
-            guild_id: guild_id.into(),
             op: Opcode::Pause,
+            guild_id,
             pause,
         }
     }
@@ -72,18 +77,28 @@ impl Play {
     ///
     /// let _msg = Play::new("381880193251409931", "info here", None, None);
     /// ```
-    pub fn new<S: Into<String>>(
-        guild_id: S,
-        track: S,
+    #[inline]
+    pub fn new(
+        guild_id: impl Into<String>,
+        track: impl Into<String>,
+        start_time: Option<u64>,
+        end_time: Option<u64>,
+    ) -> Self {
+        Self::_new(guild_id.into(), track.into(), start_time, end_time)
+    }
+
+    fn _new(
+        guild_id: String,
+        track: String,
         start_time: Option<u64>,
         end_time: Option<u64>,
     ) -> Self {
         Self {
-            guild_id: guild_id.into(),
             op: Opcode::Play,
-            track: track.into(),
+            guild_id,
             end_time,
             start_time,
+            track,
         }
     }
 }
@@ -111,10 +126,15 @@ impl Seek {
     ///
     /// let _msg = Seek::new("381880193251409931", 30_000);
     /// ```
-    pub fn new<S: Into<String>>(guild_id: S, position: i64) -> Self {
+    #[inline]
+    pub fn new(guild_id: impl Into<String>, position: i64) -> Self {
+        Self::_new(guild_id.into(), position)
+    }
+
+    fn _new(guild_id: String, position: i64) -> Self {
         Self {
-            guild_id: guild_id.into(),
             op: Opcode::Seek,
+            guild_id,
             position,
         }
     }
@@ -141,10 +161,15 @@ impl Stop {
     ///
     /// let _msg = Stop::new("381880193251409931");
     /// ```
-    pub fn new<S: Into<String>>(guild_id: S) -> Self {
+    #[inline]
+    pub fn new(guild_id: impl Into<String>) -> Self {
+        Self::_new(guild_id.into())
+    }
+
+    fn _new(guild_id: String) -> Self {
         Self {
-            guild_id: guild_id.into(),
             op: Opcode::Stop,
+            guild_id,
         }
     }
 }
@@ -165,12 +190,27 @@ pub struct VoiceUpdate {
 
 impl VoiceUpdate {
     /// Creates a new voice update message.
-    pub fn new<S>(session_id: S, guild_id: S, token: S, endpoint: S) -> Self
-        where S: Into<String> {
-        let endpoint = endpoint.into();
-        let guild_id = guild_id.into();
-        let token = token.into();
+    #[inline]
+    pub fn new(
+        session_id: impl Into<String>,
+        guild_id: impl Into<String>,
+        token: impl Into<String>,
+        endpoint: impl Into<String>,
+    ) -> Self {
+        Self::_new(
+            session_id.into(),
+            guild_id.into(),
+            token.into(),
+            endpoint.into(),
+        )
+    }
 
+    fn _new(
+        session_id: String,
+        guild_id: String,
+        token: String,
+        endpoint: String,
+    ) -> Self {
         Self {
             event: VoiceUpdateEvent {
                 guild_id: guild_id.clone(),
@@ -178,7 +218,7 @@ impl VoiceUpdate {
                 token,
             },
             op: Opcode::VoiceUpdate,
-            session_id: session_id.into(),
+            session_id: session_id,
             guild_id,
         }
     }
@@ -222,10 +262,15 @@ impl Volume {
     ///
     /// let _msg = Volume::new("381880193251409931", 110);
     /// ```
-    pub fn new<S: Into<String>>(guild_id: S, volume: i32) -> Self {
+    #[inline]
+    pub fn new(guild_id: impl Into<String>, volume: i32) -> Self {
+        Self::_new(guild_id.into(), volume)
+    }
+
+    fn _new(guild_id: String, volume: i32) -> Self {
         Self {
-            guild_id: guild_id.into(),
             op: Opcode::Volume,
+            guild_id,
             volume,
         }
     }

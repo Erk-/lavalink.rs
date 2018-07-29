@@ -38,6 +38,7 @@
 //! [lavalink]: https://github.com/Frederikam/Lavalink
 //! [license]: https://github.com/serenity-rs/lavalink.rs/blob/master/LICENSE.md
 
+#[macro_use] extern crate log;
 #[macro_use] extern crate serde_derive;
 
 extern crate percent_encoding;
