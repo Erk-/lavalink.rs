@@ -212,11 +212,7 @@ impl VoiceUpdate {
         endpoint: String,
     ) -> Self {
         Self {
-            event: VoiceUpdateEvent {
-                guild_id: guild_id.clone(),
-                endpoint,
-                token,
-            },
+            event: VoiceUpdateEvent::new(endpoint, guild_id.as_ref(), token),
             op: Opcode::VoiceUpdate,
             session_id: session_id,
             guild_id,
@@ -236,6 +232,26 @@ pub struct VoiceUpdateEvent {
     pub guild_id: String,
     /// The token.
     pub token: String,
+}
+
+impl VoiceUpdateEvent {
+    /// Creates a new voice update event.
+    #[inline]
+    pub fn new(
+        endpoint: impl Into<String>,
+        guild_id: impl Into<String>,
+        token: impl Into<String>,
+    ) -> Self {
+        Self::_new(endpoint.into(), guild_id.into(), token.into())
+    }
+
+    fn _new(endpoint: String, guild_id: String, token: String) -> Self {
+        Self {
+            endpoint,
+            guild_id,
+            token,
+        }
+    }
 }
 
 /// A message sent to an audio node to update the volume of a player.
