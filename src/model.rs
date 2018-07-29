@@ -214,7 +214,7 @@ impl VoiceUpdate {
         Self {
             event: VoiceUpdateEvent::new(endpoint, guild_id.as_ref(), token),
             op: Opcode::VoiceUpdate,
-            session_id: session_id,
+            session_id,
             guild_id,
         }
     }

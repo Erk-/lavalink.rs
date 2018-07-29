@@ -138,7 +138,7 @@ impl LavalinkRestRequester for ReqwestClient {
             self,
             host.as_ref(),
             password.as_ref(),
-            tracks.into_iter().map(Into::into).collect(),
+            &tracks.into_iter().map(Into::into).collect::<Vec<_>>(),
         )
     }
 }
@@ -164,8 +164,8 @@ fn decode_track(
     let info = serde_json::from_slice(&response)?;
 
     Ok(LoadedTrack {
-        track: track,
         info,
+        track,
     })
 }
 
@@ -173,7 +173,7 @@ fn decode_tracks(
     client: &ReqwestClient,
     host: &str,
     password: &[u8],
-    tracks: Vec<Vec<u8>>,
+    tracks: &[Vec<u8>],
 ) -> Result<Vec<LoadedTrack>> {
     let tracks = serde_json::to_vec(&tracks)?;
     let body = (tracks, ContentType::json());
@@ -183,8 +183,8 @@ fn decode_tracks(
         Method::Post,
         "/decodetracks",
         Some(body),
-        host.as_ref(),
-        password.as_ref(),
+        host,
+        password,
     ).build()?;
 
     run_request(client, request)

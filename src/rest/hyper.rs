@@ -71,7 +71,7 @@ impl<C: Connect + 'static> LavalinkRestRequester for Client<C, Body> {
             self,
             host.as_ref(),
             password.as_ref(),
-            tracks.into_iter().map(Into::into).collect(),
+            &tracks.into_iter().map(Into::into).collect::<Vec<_>>(),
         )
     }
 }
@@ -82,14 +82,13 @@ fn decode_track<C: Connect + 'static>(
     password: &[u8],
     track: String,
 ) -> Box<Future<Item = LoadedTrack, Error = Error>> {
-    let track = track.into();
     let uri = format!("/decodetrack?track={}", track);
     let request = create_request(
         Method::GET,
         uri.as_ref(),
         None,
-        host.as_ref(),
-        password.as_ref(),
+        host,
+        password,
     );
     let request = match request {
         Ok(v) => v,
@@ -110,7 +109,7 @@ fn decode_tracks<C: Connect + 'static>(
     client: &Client<C, Body>,
     host: &str,
     password: &[u8],
-    tracks: Vec<Vec<u8>>,
+    tracks: &[Vec<u8>],
 ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
     let tracks = match serde_json::to_vec(&tracks) {
         Ok(tracks) => tracks,
@@ -122,8 +121,8 @@ fn decode_tracks<C: Connect + 'static>(
         Method::POST,
         "/decodetracks",
         Some(body),
-        host.as_ref(),
-        password.as_ref(),
+        host,
+        password,
     );
     let request = match request {
         Ok(v) => v,
@@ -139,9 +138,6 @@ fn load_tracks<C: Connect + 'static>(
     password: &[u8],
     identifier: &str,
 ) -> Box<Future<Item = Vec<LoadedTrack>, Error = Error>> {
-
-    let identifier = identifier.as_ref();
-
     // url encoding the identifier
     let identifier = percent_encoding::utf8_percent_encode(
         identifier,
@@ -153,8 +149,8 @@ fn load_tracks<C: Connect + 'static>(
         Method::GET,
         uri.as_ref(),
         None,
-        host.as_ref(),
-        password.as_ref(),
+        host,
+        password,
     );
     let request = match request {
         Ok(v) => v,
