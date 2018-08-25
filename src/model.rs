@@ -527,9 +527,12 @@ macro_rules! impl_stuff_for_model {
 }
 
 impl_stuff_for_model! {
+    Destroy,
     Pause,
     Play,
+    PlayerUpdate,
     Seek,
+    Stats,
     Stop,
     VoiceUpdate,
     Volume
