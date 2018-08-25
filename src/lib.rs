@@ -1,3 +1,5 @@
+//! [![ci-badge][]][ci] [![license-badge][]][license] [![docs-badge][]][docs] [![rust badge]][rust link]
+//!
 //! lavalink.rs is a client implemented in Rust used for communicating with
 //! [lavalink] audio nodes.
 //!
@@ -11,6 +13,8 @@
 //! - [`serenity-lavalink`], used with the [`serenity`] library.
 //!
 //! ### Installation
+//!
+//! This library requires at least Rust 1.26.0.
 //!
 //! If using `lavalink.rs` directly, add the following to your `Cargo.toml`:
 //!
@@ -32,11 +36,15 @@
 //! [`serenity`]: https://github.com/serenity-rs/serenity
 //! [`serenity-lavalink`]: https://github.com/serenity-rs/serenity-lavalink
 //! [ci]: https://travis-ci.org/zeyla/lavalink.rs
-//! [ci-badge]: https://travis-ci.org/zeyla/lavalink.rs.svg?branch=master
-//! [docs]: https://docs.rs/lavalink
-//! [docs-badge]: https://img.shields.io/badge/docs-online-5023dd.svg
+//! [ci-badge]: https://img.shields.io/travis/zeyla/lavalink.rs.svg?style=flat-square
+//! [docs]: https://docs.rs/crate/lavalink
+//! [docs-badge]: https://img.shields.io/badge/docs-online-2020ff.svg?style=flat-square
 //! [lavalink]: https://github.com/Frederikam/Lavalink
-//! [license]: https://github.com/zeyla/lavalink.rs/blob/master/LICENSE.md
+//! [license]: https://github.com/serenity-rs/lavalink.rs/blob/master/LICENSE.md
+//! [license]: https://opensource.org/licenses/ISC
+//! [license-badge]: https://img.shields.io/badge/license-ISC-blue.svg?style=flat-square
+//! [rust badge]: https://img.shields.io/badge/rust-1.26+-93450a.svg?style=flat-square
+//! [rust link]: https://blog.rust-lang.org/2018/05/10/Rust-1.26.html
 
 #[macro_use]
 extern crate serde_derive;
