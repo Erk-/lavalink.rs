@@ -4,6 +4,24 @@ use serde::Serializer;
 use super::opcodes::Opcode;
 use std::result::Result as StdResult;
 
+/// An incoming message from the node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum IncomingMessage {
+    PlayerUpdate(PlayerUpdate),
+    Stats(Stats),
+}
+
+/// An outgoing message to the node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum OutgoingMessage {
+    Pause(Pause),
+    Play(Play),
+    Seek(Seek),
+    Stop(Stop),
+    VoiceUpdate(VoiceUpdate),
+    Volume(Volume),
+}
+
 /// A message sent to a node to modify the pause state a guild's player.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
