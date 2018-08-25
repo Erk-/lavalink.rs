@@ -6,6 +6,7 @@ homepage = "https://github.com/zeyla/lavalink.rs"
 keywords = ["lavalink"]
 license = "ISC"
 name = "lavalink"
+publish = false
 readme = "README.md"
 repository = "https://github.com/zeyla/lavalink.rs.git"
 version = "0.1.0"
