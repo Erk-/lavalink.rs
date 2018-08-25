@@ -218,8 +218,10 @@ impl PlayerUpdate {
 /// **Note**: This is only received from a node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PlayerUpdateState {
-    position: i64,
-    time: u64,
+    /// The current position of the player.
+    pub position: i64,
+    /// The Unix timestamp of the update.
+    pub time: u64,
 }
 
 impl PlayerUpdateState {
@@ -298,6 +300,7 @@ pub struct Stats {
     pub playing_players: i32,
     /// The uptime of the node.
     pub uptime: i64,
+    op: Opcode,
 }
 
 /// The CPU usage of a node.
