@@ -10,6 +10,7 @@
 //!
 //! Here is a list of known libraries:
 //!
+//! - [`lavalink-futures`], an async implementation of a Lavalink client
 //! - [`serenity-lavalink`], used with the [`serenity`] library.
 //!
 //! ### Installation
@@ -33,6 +34,7 @@
 //!
 //! The library is licensed under the [ISC license][license].
 //!
+//! [`lavalink-futures`]: https://github.com/zeyla/lavalink-futures
 //! [`serenity`]: https://github.com/serenity-rs/serenity
 //! [`serenity-lavalink`]: https://github.com/serenity-rs/serenity-lavalink
 //! [ci]: https://travis-ci.org/zeyla/lavalink.rs
