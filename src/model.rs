@@ -103,6 +103,78 @@ impl Play {
     }
 }
 
+/// Position information about a player, including the Unix timestamp.
+///
+/// **Note**: This is only received from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerUpdate {
+    pub guild_id: String,
+    op: Opcode,
+    pub state: PlayerUpdateState,
+}
+
+impl PlayerUpdate {
+    /// Creates a new `PlayerUpdate` message.
+    ///
+    /// # Examples
+    ///
+    /// Create a new player update message with position 60000 at timestamp
+    /// 1535170125:
+    ///
+    /// ```rust,no_run
+    /// use lavalink::model::{PlayerUpdate, PlayerUpdateEvent};
+    ///
+    /// let _msg = PlayerUpdate::new(
+    ///     "381880193251409931",
+    ///     1535170125,
+    ///     60000,
+    /// );
+    /// ```
+    #[inline]
+    pub fn new(guild_id: impl Into<String>, time: u64, position: i64) -> Self {
+        Self::_new(guild_id.into(), time, position)
+    }
+
+    fn _new(guild_id: String, time: u64, position: i64) -> Self {
+        Self {
+            op: Opcode::PlayerUpdate,
+            state: PlayerUpdateState::new(time, position),
+            guild_id,
+        }
+    }
+}
+
+/// State about a player update.
+///
+/// **Note**: This is only received from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PlayerUpdateState {
+    position: i64,
+    time: u64,
+}
+
+impl PlayerUpdateState {
+    /// Creates a new set of `PlayerUpdateState` data.
+    ///
+    /// # Examples
+    ///
+    /// Create a new player update state with position 60000 at timestamp
+    /// 1535170125:
+    ///
+    /// ```rust,no_run
+    /// use lavalink::model::PlayerUpdateEvent;
+    ///
+    /// let _msg = PlayerUpdateEvent::new(60000, 1535170125);
+    /// ```
+    pub fn new(time: u64, position: i64) -> Self {
+        Self {
+            position,
+            time,
+        }
+    }
+}
+
 /// A message sent to a node to seek a guild's audio player to a specific time.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -138,6 +210,73 @@ impl Seek {
             position,
         }
     }
+}
+
+/// A payload containing statistics about a node.
+///
+/// **Note**: This is only received from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stats {
+    /// The CPU usage of the node.
+    pub cpu: StatsCpu,
+    /// The frame information of the node.
+    pub frames: Option<StatsFrames>,
+    /// The memory usage of the node.
+    pub memory: StatsMemory,
+    /// The number of players, both active and inactive.
+    pub players: i32,
+    /// The number of active players.
+    pub playing_players: i32,
+    /// The uptime of the node.
+    pub uptime: i64,
+}
+
+/// The CPU usage of a node.
+///
+/// **Note**: This is only received from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StatsCpu {
+    /// The number of CPU cores available.
+    pub cores: i64,
+    /// The system load.
+    pub system_load: f64,
+    /// The lavalink node load.
+    pub lavalink_load: f64,
+}
+
+/// The statistics about a node's frames.
+///
+/// **Note**: This is only received from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StatsFrames {
+    /// The average number of frames sent per minute.
+    #[serde(rename = "sent")]
+    pub average_sent_per_minute: i64,
+    /// The average number of nulled frames per minute.
+    #[serde(rename = "nulled")]
+    pub average_nulled_per_minute: i64,
+    /// The average frame deficit per minute.
+    #[serde(rename = "deficit")]
+    pub average_deficit_per_minute: i64,
+}
+
+/// The memory usage of a node.
+///
+/// **Note**: This is only received from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StatsMemory {
+    /// The allocated amount of memory.
+    pub allocated: i64,
+    /// The free amount of memory.
+    pub free: i64,
+    /// The reservable amount of memory.
+    pub reservable: i64,
+    /// The used amount of memory.
+    pub used: i64,
 }
 
 /// A message sent to a node to stop a guild's audio player.
