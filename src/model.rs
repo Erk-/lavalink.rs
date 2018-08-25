@@ -315,7 +315,7 @@ impl Stop {
 
 /// A message sent to a node, relaying a voice state update received from
 /// Discord.
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VoiceUpdate {
     /// The event data for the voice update.
