@@ -1,5 +1,5 @@
 [package]
-authors = ["sponges <spongybacon@hotmail.co.uk>", "Zeyla Hellyer <zey@zey.moe>"]
+authors = ["sponges <spongybacon@hotmail.co.uk>", "Zeyla Hellyer <hi@zeyla.me>"]
 description = "Rust client for Lavalink."
 documentation = "https://docs.rs/lavalink"
 homepage = "https://github.com/zeyla/lavalink.rs"
