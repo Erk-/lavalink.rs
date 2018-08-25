@@ -14,12 +14,40 @@ pub enum IncomingMessage {
 /// An outgoing message to the node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum OutgoingMessage {
+    Destroy(Destroy),
     Pause(Pause),
     Play(Play),
     Seek(Seek),
     Stop(Stop),
     VoiceUpdate(VoiceUpdate),
     Volume(Volume),
+}
+
+/// A message sent to a node to destroy a player.
+///
+/// This is useful if you want to move to a new node for a voice connection.
+/// This does not affect the voice state.
+///
+/// **Note**: This is only sent to a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Destroy {
+    /// The ID of the guild.
+    pub guild_id: String,
+    op: Opcode,
+}
+
+impl Destroy {
+    pub fn new(guild_id: impl Into<String>) -> Self {
+        Self::_new(guild_id.into())
+    }
+
+    fn _new(guild_id: String) -> Self {
+        Self {
+            op: Opcode::Destroy,
+            guild_id,
+        }
+    }
 }
 
 /// A message sent to a node to modify the pause state a guild's player.

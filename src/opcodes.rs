@@ -11,6 +11,10 @@ use std::string::ToString;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Opcode {
+    /// Destroys a player for a guild.
+    ///
+    /// This is sent by the client to the server.
+    Destroy,
     /// Indicates that the server emitted an event.
     ///
     /// This is sent by the server to the client.
@@ -57,6 +61,7 @@ impl ToString for Opcode {
         use self::Opcode::*;
 
         match *self {
+            Destroy => "destroy",
             Event => "event",
             Pause => "pause",
             Play => "play",
@@ -78,6 +83,7 @@ impl FromStr for Opcode {
         use self::Opcode::*;
 
         Ok(match s {
+            "destroy" => Destroy,
             "voiceUpdate" => VoiceUpdate,
             "play" => Play,
             "stop" => Stop,
