@@ -191,7 +191,7 @@ impl PlayerUpdate {
     /// 1535170125:
     ///
     /// ```rust,no_run
-    /// use lavalink::model::{PlayerUpdate, PlayerUpdateEvent};
+    /// use lavalink::model::PlayerUpdate;
     ///
     /// let _msg = PlayerUpdate::new(
     ///     "381880193251409931",
@@ -231,9 +231,9 @@ impl PlayerUpdateState {
     /// 1535170125:
     ///
     /// ```rust,no_run
-    /// use lavalink::model::PlayerUpdateEvent;
+    /// use lavalink::model::PlayerUpdateState;
     ///
-    /// let _msg = PlayerUpdateEvent::new(60000, 1535170125);
+    /// let _msg = PlayerUpdateState::new(60000, 1535170125);
     /// ```
     pub fn new(time: u64, position: i64) -> Self {
         Self {
