@@ -325,13 +325,13 @@ pub struct StatsCpu {
 pub struct StatsFrames {
     /// The average number of frames sent per minute.
     #[serde(rename = "sent")]
-    pub average_sent_per_minute: i64,
+    pub average_sent_per_minute: f64,
     /// The average number of nulled frames per minute.
     #[serde(rename = "nulled")]
-    pub average_nulled_per_minute: i64,
+    pub average_nulled_per_minute: f64,
     /// The average frame deficit per minute.
     #[serde(rename = "deficit")]
-    pub average_deficit_per_minute: i64,
+    pub average_deficit_per_minute: f64,
 }
 
 /// The memory usage of a node.
