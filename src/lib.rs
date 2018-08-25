@@ -63,7 +63,6 @@ extern crate reqwest;
 pub mod model;
 pub mod opcodes;
 pub mod rest;
-pub mod stats;
 pub mod decoder;
 
 mod error;
