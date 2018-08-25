@@ -7,6 +7,8 @@ use std::result::Result as StdResult;
 /// An incoming message from the node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum IncomingMessage {
+    /// Indicator that this is an event from the server.
+    Event(Event),
     /// Indicator that this is a PlayerUpdate payload.
     PlayerUpdate(PlayerUpdate),
     /// Indicator that this is a Stats payload.
@@ -68,6 +70,56 @@ impl Destroy {
             guild_id,
         }
     }
+}
+
+/// An event from the server.
+///
+/// **Note**: This is only sent from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum Event {
+    /// An indicator that a track ended.
+    TrackEnd(EventTrackEnd),
+    /// An indicator that an exception occurred while playing a track.
+    TrackException(EventTrackException),
+    /// An indicator that a track became stuck.
+    TrackStuck(EventTrackStuck),
+}
+
+/// A track was ended.
+///
+/// **Note**: This is only sent from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventTrackEnd {
+    /// The reason for the track ending.
+    pub reason: String,
+    /// The track that ended.
+    pub track: String,
+}
+
+/// An exception occurred while playing a track.
+///
+/// **Note**: This is only sent from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventTrackException {
+    /// The reason for the exception.
+    pub error: String,
+    /// The track that ended.
+    pub track: String,
+}
+
+/// A track became stuck.
+///
+/// **Note**: This is only sent from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventTrackStuck {
+    /// The reason for the track ending.
+    pub threshold_ms: i64,
+    /// The track that ended.
+    pub track: String,
 }
 
 /// A message sent to a node to modify the pause state a guild's player.
