@@ -7,19 +7,28 @@ use std::result::Result as StdResult;
 /// An incoming message from the node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum IncomingMessage {
+    /// Indicator that this is a PlayerUpdate payload.
     PlayerUpdate(PlayerUpdate),
+    /// Indicator that this is a Stats payload.
     Stats(Stats),
 }
 
 /// An outgoing message to the node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum OutgoingMessage {
+    /// Indicator that this is a Destroy payload.
     Destroy(Destroy),
+    /// Indicator that this is a Pause payload.
     Pause(Pause),
+    /// Indicator that this is a Play payload.
     Play(Play),
+    /// Indicator that this is a Seek payload.
     Seek(Seek),
+    /// Indicator that this is a Stop payload.
     Stop(Stop),
+    /// Indicator that this is a VoiceUpdate payload.
     VoiceUpdate(VoiceUpdate),
+    /// Indicator that this is a Volume payload.
     Volume(Volume),
 }
 
@@ -38,6 +47,17 @@ pub struct Destroy {
 }
 
 impl Destroy {
+    /// Creates a new `Destroy` message.
+    ///
+    /// # Examples
+    ///
+    /// Destroy the player for a guild:
+    ///
+    /// ```rust,no_run
+    /// use lavalink::model::Destroy;
+    ///
+    /// let _msg = Destroy::new("381880193251409931");
+    /// ```
     pub fn new(guild_id: impl Into<String>) -> Self {
         Self::_new(guild_id.into())
     }
@@ -155,8 +175,10 @@ impl Play {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerUpdate {
+    /// The ID of the guild.
     pub guild_id: String,
     op: Opcode,
+    /// The new state information.
     pub state: PlayerUpdateState,
 }
 

@@ -1,3 +1,6 @@
+//! A trait implementation for Hyper's Client for working with the Lavalink
+//! REST API.
+
 use futures::{Future, Stream, future};
 use hyper::client::connect::Connect;
 use hyper::header::{CONTENT_TYPE, HeaderValue};
@@ -9,7 +12,10 @@ use std::str::FromStr;
 use super::{Load, LoadedTrack};
 use ::{Error, Result};
 
+/// Trait to implement for working with the Lavalink REST API over a Hyper
+/// client.
 pub trait LavalinkRestRequester {
+    /// Loads tracks matching an identifier via a given node.
     fn load_tracks(
         &self,
         host: impl AsRef<str>,
@@ -17,6 +23,7 @@ pub trait LavalinkRestRequester {
         identifier: impl AsRef<str>,
     ) -> Box<Future<Item = Load, Error = Error>>;
 
+    /// Decodes a track via a given node.
     fn decode_track(
         &self,
         host: impl AsRef<str>,
@@ -24,6 +31,7 @@ pub trait LavalinkRestRequester {
         track: impl Into<String>,
     ) -> Box<Future<Item = LoadedTrack, Error = Error>>;
 
+    /// Decodes a vector of tracks via a given node.
     fn decode_tracks(
         &self,
         host: impl AsRef<str>,

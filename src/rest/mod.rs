@@ -1,3 +1,16 @@
+//! Hyper and reqwest implementations for working with the Lavalink REST API.
+//!
+//! To enable each implementation, add the following to your `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies.lavalink]
+//! default-features = false
+//! features = [
+//!     "hyper-support", // and/or
+//!     "reqwest-support",
+//! ]
+//! ```
+
 #[cfg(feature = "hyper")]
 pub mod hyper;
 #[cfg(feature = "reqwest")]

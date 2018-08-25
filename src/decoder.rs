@@ -1,3 +1,5 @@
+//! Functions for decoding a track.
+
 use byteorder::{BE, ReadBytesExt};
 use std::io::{Cursor, Read};
 use Result;
@@ -23,13 +25,21 @@ fn read_string(cursor: &mut Cursor<Vec<u8>>) -> Result<String> {
 /// Holds decoded track information from a lavaplayer track blob
 #[derive(Debug)]
 pub struct DecodedTrack {
+    /// The version of the track.
     pub version: u8,
+    /// The title of the track.
     pub title: String,
+    /// The author of the track.
     pub author: String,
+    /// The length of the track.
     pub length: u64,
+    /// The unique identifier for the track.
     pub identifier: String,
+    /// Whether the track is a stream.
     pub stream: bool,
+    /// The URL of the track.
     pub url: Option<String>,
+    /// The source of the track.
     pub source: String,
 }
 

@@ -1,3 +1,6 @@
+//! A trait implementation for Reqwest's Client and an owned client for working
+//! with the Lavalink REST API.
+
 use percent_encoding::{self, DEFAULT_ENCODE_SET};
 use reqwest::header::{ContentType, Headers};
 use reqwest::{Body, Client as ReqwestClient, Method, Request, RequestBuilder};
@@ -38,6 +41,7 @@ impl RestClient {
         }
     }
 
+    /// Loads tracks matching an identifier via a given node.
     #[inline]
     pub fn load_tracks(&self, identifier: impl AsRef<str>)
         -> Result<Load> {
@@ -48,6 +52,7 @@ impl RestClient {
         self.client.load_tracks(&self.host, &self.password, identifier)
     }
 
+    /// Decodes a track via a given node.
     #[inline]
     pub fn decode_track(
         &self,
@@ -60,6 +65,7 @@ impl RestClient {
         self.client.decode_track(&self.host, &self.password, track)
     }
 
+    /// Decodes a vector of tracks via a given node.
     #[inline]
     pub fn decode_tracks<T, It>(
         &self,
@@ -73,7 +79,10 @@ impl RestClient {
     }
 }
 
+/// Trait to implement for working with the Lavalink REST API over a Reqwest
+/// client.
 pub trait LavalinkRestRequester {
+    /// Loads tracks matching an identifier via a given node.
     fn load_tracks(
         &self,
         host: impl AsRef<str>,
@@ -81,6 +90,7 @@ pub trait LavalinkRestRequester {
         identifier: impl AsRef<str>,
     ) -> Result<Load>;
 
+    /// Decodes a track via a given node.
     fn decode_track(
         &self,
         host: impl AsRef<str>,
@@ -88,6 +98,7 @@ pub trait LavalinkRestRequester {
         track: impl Into<String>,
     ) -> Result<LoadedTrack>;
 
+    /// Decodes a vector of tracks via a given node.
     fn decode_tracks(
         &self,
         host: impl AsRef<str>,
