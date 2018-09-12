@@ -18,19 +18,19 @@ pub mod reqwest;
 
 /// Information about loaded tracks.
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub struct Load {
     /// The type of track load.
     pub load_type: LoadType,
     /// The playlist information.
-    pub playlist_info: Option<PlaylistInfo>,
+    pub playlist_info: PlaylistInfo,
     /// The list of tracks.
     pub tracks: Vec<LoadedTrack>,
 }
 
 /// The type of a track load.
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LoadType {
     /// Indicator that loading the track failed.
     LoadFailed,
@@ -46,7 +46,7 @@ pub enum LoadType {
 
 /// Meta information about a loaded track.
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub struct LoadedTrackInfo {
     /// The title of the track.
     pub title: String,
@@ -80,7 +80,7 @@ pub struct LoadedTrack {
 #[serde(rename = "camelCase")]
 pub struct PlaylistInfo {
     /// The name of the playlist.
-    pub name: String,
+    pub name: Option<String>,
     /// The item that was selected.
-    pub selected_track: u64,
+    pub selected_track: Option<u64>,
 }

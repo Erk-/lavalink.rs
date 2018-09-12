@@ -41,5 +41,5 @@ version = "0.8"
 
 [features]
 default = ["hyper-support"]
-hyper-support = ["futures", "http", "hyper"]
+hyper-support = ["futures", "http", "hyper", "log"]
 reqwest-support = ["log", "reqwest"]

@@ -176,6 +176,7 @@ fn create_request(
     password: &[u8],
 ) -> Result<Request<Body>> {
     let uri = Uri::from_str(&format!("{}{}", host, uri))?;
+    debug!("uri: {:?}", uri);
     let mut req = Request::builder();
     req.method(method);
     req.uri(uri);
@@ -199,6 +200,11 @@ fn run_request<C, T>(client: &Client<C, Body>, request: Request<Body>)
     Box::new(client.request(request)
         .and_then(|res| res.into_body().concat2())
         .from_err::<Error>()
+        .map(|body| {
+            debug!("Body: {}", String::from_utf8_lossy(&body));
+
+            body
+        })
         .and_then(|body| serde_json::from_slice::<T>(&body).map_err(From::from))
         .from_err())
 }
