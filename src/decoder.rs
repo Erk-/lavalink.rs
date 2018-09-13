@@ -17,9 +17,9 @@ fn read_string(cursor: &mut Cursor<Vec<u8>>) -> Result<String> {
     let size = cursor.read_u16::<BE>()?;
     let mut buf = vec![0u8; size as usize];
     cursor.read_exact(&mut buf)?;
-    let string = String::from_utf8(buf)?;
 
-    Ok(string)
+    let string = String::from_utf8_lossy(&buf);
+    Ok(string.to_owned().to_string())
 }
 
 /// Holds decoded track information from a lavaplayer track blob
@@ -106,4 +106,16 @@ pub fn decode_track_base64(input: impl AsRef<str>) -> Result<DecodedTrack> {
 #[inline]
 fn _decode_track_base64(input: &str) -> Result<DecodedTrack> {
     decode_track(::base64::decode(input)?)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_base64() {
+        let track = "QAAApQIAQlNIRSBXQVMgTUFEIEFUIE1FLCBTTyBJIEhBRCBUTyBCVVkgSE\
+VSIFNPTUVUSElORyBOSUNFIO2gve2ypu2gve24nAAJTmlUcmlzIFR2AAAAAAAM/DgACzlFRFNDX0Rqb\
+zFnAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9OUVEU0NfRGpvMWcAB3lvdXR1YmUA\
+AAAAAAAAAA==";
+        super::decode_track_base64(track).unwrap();
+    }
 }
