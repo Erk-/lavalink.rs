@@ -160,22 +160,20 @@ impl Pause {
 }
 
 /// A message sent to a node to play a new audio stream via a guild's player.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Play {
     /// The time at which to end the stream.
     ///
     /// If set to `None`, this will play until the stream ends.
-    #[serde(serialize_with = "serialize_option_u64")]
-    pub end_time: Option<u64>,
+    pub end_time: Option<String>,
     /// The ID of the guild whose player is having a stream added.
     pub guild_id: String,
     op: Opcode,
     /// The time at which to start the stream.
     ///
     /// If set to `None`, this will play starting at the start of a stream.
-    #[serde(serialize_with = "serialize_option_u64")]
-    pub start_time: Option<u64>,
+    pub start_time: Option<String>,
     /// The base64 encoded track information.
     pub track: String,
 }
@@ -212,10 +210,10 @@ impl Play {
         end_time: Option<u64>,
     ) -> Self {
         Self {
+            end_time: end_time.map(|x| x.to_string()),
             op: Opcode::Play,
+            start_time: start_time.map(|x| x.to_string()),
             guild_id,
-            end_time,
-            start_time,
             track,
         }
     }
@@ -554,16 +552,6 @@ impl Volume {
     }
 }
 
-/// Utility function to serialize Option<u64> with no present value as 0 instead of null
-fn serialize_option_u64<S: Serializer>(option: &Option<u64>, s: S) -> StdResult<S::Ok, S::Error> {
-    let value = match *option {
-        Some(value) => value,
-        None => 0,
-    };
-
-    s.serialize_u64(value)
-}
-
 macro_rules! impl_stuff_for_model {
     ($($model: ident),*) => {
         $(
@@ -588,4 +576,29 @@ impl_stuff_for_model! {
     Stop,
     VoiceUpdate,
     Volume
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json;
+    use super::Play;
+
+    #[test]
+    fn test_play_deser() {
+        let json = r#"{
+  "endTime": "7",
+  "guildId": "1",
+  "op": "play",
+  "startTime": "1",
+  "track": "hi"
+}"#;
+        let play = Play::new("1", "hi", Some(1), Some(7));
+
+        assert_eq!(
+            serde_json::from_str::<Play>(json).unwrap(),
+            play,
+        );
+
+        assert_eq!(serde_json::to_string_pretty(&play).unwrap(), json);
+    }
 }
