@@ -6,6 +6,7 @@ use std::result::Result as StdResult;
 
 /// An incoming message from the node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(untagged)]
 pub enum IncomingMessage {
     /// Indicator that this is an event from the server.
     Event(Event),
@@ -17,6 +18,7 @@ pub enum IncomingMessage {
 
 /// An outgoing message to the node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(untagged)]
 pub enum OutgoingMessage {
     /// Indicator that this is a Destroy payload.
     Destroy(Destroy),
@@ -343,6 +345,7 @@ pub struct Stats {
     /// The CPU usage of the node.
     pub cpu: StatsCpu,
     /// The frame information of the node.
+    #[serde(rename = "frameStats")]
     pub frames: Option<StatsFrames>,
     /// The memory usage of the node.
     pub memory: StatsMemory,
@@ -588,4 +591,67 @@ impl_stuff_for_model! {
     Stop,
     VoiceUpdate,
     Volume
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json;
+    use super::*;
+
+    static PLAYER_UPDATE: &'static str = r#"{
+  "guildId": "1",
+  "op": "playerUpdate",
+  "state": {
+    "position": 45120,
+    "time": 1537848743531
+  }
+}"#;
+
+    static STATS: &'static str = r#"{
+  "cpu": {
+    "cores": 4,
+    "systemLoad": 0.022558908466914995,
+    "lavalinkLoad": 0.003833333333333
+  },
+  "frameStats": {
+    "sent": 3000.0,
+    "nulled": 0.0,
+    "deficit": 0.0
+  },
+  "memory": {
+    "allocated": 187695104,
+    "free": 88357736,
+    "reservable": 2013265920,
+    "used": 99337368
+  },
+  "players": 1,
+  "playingPlayers": 1,
+  "uptime": 79943650,
+  "op": "stats"
+}"#;
+
+    #[test]
+    fn test_incoming_message_deser() {
+        serde_json::from_str::<IncomingMessage>(STATS).unwrap();
+    }
+
+    #[test]
+    fn test_stats_deser() {
+        let stats = serde_json::from_str::<Stats>(STATS).unwrap();
+
+        assert_eq!(serde_json::to_string_pretty(&stats).unwrap(), STATS);
+    }
+
+    #[test]
+    fn test_player_update_deser() {
+        let update = serde_json::from_str::<PlayerUpdate>(
+            PLAYER_UPDATE,
+        ).unwrap();
+        assert_eq!(update.guild_id, "1");
+
+        assert_eq!(
+            serde_json::to_string_pretty(&update).unwrap(),
+            PLAYER_UPDATE,
+        );
+    }
 }
