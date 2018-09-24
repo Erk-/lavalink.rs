@@ -8,7 +8,7 @@ use std::string::ToString;
 /// Note that although serde's `Deserialize` and `Serialize` are derived on this
 /// type, it may be preferable to use the `FromStr` and `ToString`
 /// implementations for performance in some cases.
-#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Opcode {
     /// Destroys a player for a guild.
