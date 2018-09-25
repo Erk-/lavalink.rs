@@ -94,6 +94,8 @@ pub enum Event {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventTrackEnd {
+    /// The guild ID of the affected player.
+    pub guild_id: String,
     /// The reason for the track ending.
     pub reason: String,
     /// The track that ended.
@@ -106,6 +108,8 @@ pub struct EventTrackEnd {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventTrackException {
+    /// The guild ID of the affected player.
+    pub guild_id: String,
     /// The reason for the exception.
     pub error: String,
     /// The track that ended.
@@ -118,6 +122,8 @@ pub struct EventTrackException {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventTrackStuck {
+    /// The guild ID of the affected player.
+    pub guild_id: String,
     /// The reason for the track ending.
     pub threshold_ms: i64,
     /// The track that ended.
