@@ -100,6 +100,28 @@ pub struct EventTrackEnd {
     pub reason: String,
     /// The track that ended.
     pub track: String,
+    op: Opcode,
+}
+
+impl EventTrackEnd {
+    /// Creates a new EventTrackException instance.
+    #[inline]
+    pub fn new(
+        guild_id: impl Into<String>,
+        reason: impl Into<String>,
+        track: impl Into<String>,
+    ) -> Self {
+        Self::_new(guild_id.into(), reason.into(), track.into())
+    }
+
+    fn _new(guild_id: String, reason: String, track: String) -> Self {
+        Self {
+            op: Opcode::Event,
+            guild_id,
+            reason,
+            track,
+        }
+    }
 }
 
 /// An exception occurred while playing a track.
@@ -114,6 +136,28 @@ pub struct EventTrackException {
     pub error: String,
     /// The track that ended.
     pub track: String,
+    op: Opcode,
+}
+
+impl EventTrackException {
+    /// Creates a new EventTrackException instance.
+    #[inline]
+    pub fn new(
+        guild_id: impl Into<String>,
+        error: impl Into<String>,
+        track: impl Into<String>,
+    ) -> Self {
+        Self::_new(guild_id.into(), error.into(), track.into())
+    }
+
+    fn _new(guild_id: String, error: String, track: String) -> Self {
+        Self {
+            op: Opcode::Event,
+            error,
+            guild_id,
+            track,
+        }
+    }
 }
 
 /// A track became stuck.
@@ -128,6 +172,28 @@ pub struct EventTrackStuck {
     pub threshold_ms: i64,
     /// The track that ended.
     pub track: String,
+    op: Opcode,
+}
+
+impl EventTrackStuck {
+    /// Creates a new EventTrackStuck instance.
+    #[inline]
+    pub fn new(
+        guild_id: impl Into<String>,
+        threshold_ms: i64,
+        track: impl Into<String>,
+    ) -> Self {
+        Self::_new(guild_id.into(), threshold_ms, track.into())
+    }
+
+    fn _new(guild_id: String, threshold_ms: i64, track: String) -> Self {
+        Self {
+            op: Opcode::Event,
+            guild_id,
+            threshold_ms,
+            track,
+        }
+    }
 }
 
 /// A message sent to a node to modify the pause state a guild's player.
