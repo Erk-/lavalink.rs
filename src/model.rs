@@ -702,6 +702,19 @@ mod tests {
   "op": "stats"
 }"#;
 
+    static TRACK_END: &'static str = r#"{
+  "op": "event",
+  "reason": "FINISHED",
+  "type": "TrackEndEvent",
+  "track": "foo",
+  "guildId": "1"
+}"#;
+
+    #[test]
+    fn test_track_end_event() {
+        serde_json::from_str::<EventTrackEnd>(&TRACK_END).unwrap();
+    }
+
     #[test]
     fn test_incoming_message_deser() {
         serde_json::from_str::<IncomingMessage>(STATS).unwrap();
