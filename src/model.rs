@@ -88,6 +88,17 @@ pub enum Event {
     TrackStuck(EventTrackStuck),
 }
 
+impl Event {
+    /// Returns the guild ID of the event.
+    pub fn guild_id(&self) -> &str {
+        match self {
+            Event::TrackEnd(e) => &e.guild_id,
+            Event::TrackException(e) => &e.guild_id,
+            Event::TrackStuck(e) => &e.guild_id,
+        }
+    }
+}
+
 /// A track was ended.
 ///
 /// **Note**: This is only sent from a node.
