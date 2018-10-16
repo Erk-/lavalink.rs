@@ -356,7 +356,7 @@ impl PlayerUpdate {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PlayerUpdateState {
     /// The current position of the player.
-    pub position: i64,
+    pub position: Option<i64>,
     /// The Unix timestamp of the update.
     pub time: u64,
 }
@@ -376,7 +376,7 @@ impl PlayerUpdateState {
     /// ```
     pub fn new(time: u64, position: i64) -> Self {
         Self {
-            position,
+            position: Some(position),
             time,
         }
     }
