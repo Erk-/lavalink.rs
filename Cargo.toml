@@ -2,13 +2,13 @@
 authors = ["sponges <spongybacon@hotmail.co.uk>", "Zeyla Hellyer <hi@zeyla.me>"]
 description = "Rust client for Lavalink."
 documentation = "https://docs.rs/lavalink"
-homepage = "https://github.com/zeyla/lavalink.rs"
+homepage = "https://github.com/dabbotorg/lavalink.rs"
 keywords = ["lavalink"]
 license = "ISC"
 name = "lavalink"
 publish = false
 readme = "README.md"
-repository = "https://github.com/zeyla/lavalink.rs.git"
+repository = "https://github.com/dabbotorg/lavalink.rs.git"
 version = "0.1.0"
 
 [dependencies]

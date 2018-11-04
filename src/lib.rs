@@ -21,7 +21,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! lavalink = { git = "https://github.com/zeyla/lavalink.rs" }
+//! lavalink = { git = "https://github.com/dabbotorg/lavalink.rs" }
 //! ```
 //!
 //! And the following to your project's `main.rs` or `lib.rs`:
@@ -34,11 +34,11 @@
 //!
 //! The library is licensed under the [ISC license][license].
 //!
-//! [`lavalink-futures`]: https://github.com/zeyla/lavalink-futures
+//! [`lavalink-futures`]: https://github.com/dabbotorg/lavalink-futures
 //! [`serenity`]: https://github.com/serenity-rs/serenity
 //! [`serenity-lavalink`]: https://github.com/serenity-rs/serenity-lavalink
-//! [ci]: https://travis-ci.org/zeyla/lavalink.rs
-//! [ci-badge]: https://img.shields.io/travis/zeyla/lavalink.rs.svg?style=flat-square
+//! [ci]: https://travis-ci.org/dabbotorg/lavalink.rs
+//! [ci-badge]: https://img.shields.io/travis/dabbotorg/lavalink.rs.svg?style=flat-square
 //! [docs]: https://docs.rs/crate/lavalink
 //! [docs-badge]: https://img.shields.io/badge/docs-online-2020ff.svg?style=flat-square
 //! [lavalink]: https://github.com/Frederikam/Lavalink
