@@ -1,8 +1,8 @@
 //! Functions for decoding a track.
 
 use byteorder::{BE, ReadBytesExt};
+use crate::Result;
 use std::io::{Cursor, Read};
-use Result;
 
 const TRACK_INFO_VERSIONED: i32 = 1;
 

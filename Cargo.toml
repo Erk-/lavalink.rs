@@ -2,6 +2,7 @@
 authors = ["sponges <spongybacon@hotmail.co.uk>", "Zeyla Hellyer <hi@zeyla.me>"]
 description = "Rust client for Lavalink."
 documentation = "https://docs.rs/lavalink"
+edition = "2018"
 homepage = "https://github.com/dabbotorg/lavalink.rs"
 keywords = ["lavalink"]
 license = "ISC"

@@ -1,13 +1,13 @@
 //! A trait implementation for Reqwest's Client and an owned client for working
 //! with the Lavalink REST API.
 
+use crate::Result;
 use percent_encoding::{self, DEFAULT_ENCODE_SET};
 use reqwest::header::{ContentType, Headers};
 use reqwest::{Body, Client as ReqwestClient, Method, Request, RequestBuilder};
 use serde_json;
 use std::io::Read;
 use super::{Load, LoadedTrack};
-use ::Result;
 
 /// An HTTP client used to communicate with a LavaLink node.
 #[derive(Debug)]

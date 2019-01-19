@@ -1,6 +1,7 @@
 //! A trait implementation for Hyper's Client for working with the Lavalink
 //! REST API.
 
+use crate::{Error, Result};
 use futures::{Future, Stream, future};
 use hyper::client::connect::Connect;
 use hyper::header::{CONTENT_TYPE, HeaderValue};
@@ -10,7 +11,6 @@ use serde::de::DeserializeOwned;
 use serde_json;
 use std::str::FromStr;
 use super::{Load, LoadedTrack};
-use ::{Error, Result};
 
 /// Trait to implement for working with the Lavalink REST API over a Hyper
 /// client.
