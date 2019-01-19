@@ -2,7 +2,47 @@
 
 use serde::Serializer;
 use super::opcodes::Opcode;
-use std::result::Result as StdResult;
+use std::{
+    error::Error as StdError,
+    fmt::{Display, Formatter, Result as FmtResult},
+    result::Result as StdResult,
+};
+
+/// A representation of an error that occurred while creating a [`Band`].
+///
+/// [`Band`]: struct.Band.html
+#[derive(Debug)]
+pub enum BandError {
+    /// Indicator that the band value is not within the valid range.
+    ///
+    /// Refer to [`Band::band`] for more information.
+    ///
+    /// [`Band::band`]: struct.Band.html#structfield.band
+    BandInvalid,
+    /// Indicator that the gain value is not within the valid range.
+    ///
+    /// Refer to [`Gain::gain`] for more information.
+    ///
+    /// [`Gain::gain`]: struct.Gain.html#structfield.gain
+    GainInvalid,
+}
+
+impl Display for BandError {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        f.write_str(self.description())
+    }
+}
+
+impl StdError for BandError {
+    fn description(&self) -> &str {
+        use self::BandError::*;
+
+        match self {
+            BandInvalid => "The band value is not within range",
+            GainInvalid => "The gain value is not within range",
+        }
+    }
+}
 
 /// An incoming message from the node.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -34,6 +74,68 @@ pub enum OutgoingMessage {
     VoiceUpdate(VoiceUpdate),
     /// Indicator that this is a Volume payload.
     Volume(Volume),
+}
+
+/// A band for an equalizer.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Band {
+    /// There are 15 bands (0-14) that can be changed.
+    pub band: u8,
+    /// The multiplier for the band.
+    ///
+    /// Defaults to `0`.
+    ///
+    /// Valid values range from `-0.25` to `1.0`, where `-0.25` means the given
+    /// band is completely muted, and `0.25` means it is doubled.
+    ///
+    /// Modifying the gain could also change the volume of the output.
+    pub gain: f64,
+    #[serde(default, skip_deserializing, skip_serializing)]
+    nonexhaustive: (),
+}
+
+impl Band {
+    /// Creates a new Band instance.
+    ///
+    /// Refer to the structfields for limits on what these values can be.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use lavalink::model::Band;
+    ///
+    /// // These are values within valid ranges:
+    /// assert!(Band::new(0, 0.25).is_ok());
+    ///
+    /// // While this is not:
+    /// assert!(Band::new(23, -6.0).is_err());
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BandError::BandInvalid`] when the band value was not in the
+    /// valid range.
+    ///
+    /// Returns [`BandError::GainInvalid`] when the gain value was not in the
+    /// valid range.
+    pub fn new(
+        band: u8,
+        gain: f64,
+    ) -> Result<Self, BandError> {
+        if band > 14 {
+            return Err(BandError::BandInvalid);
+        }
+        if gain < -0.25 || gain > 1.0 {
+            return Err(BandError::GainInvalid);
+        }
+
+        Ok(Self {
+            band,
+            gain,
+            nonexhaustive: (),
+        })
+    }
 }
 
 /// A message sent to a node to destroy a player.
@@ -74,6 +176,57 @@ impl Destroy {
     }
 }
 
+/// Use the equalizer for a guild.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Equalizer {
+    /// The list of bands to send for the equalizer.
+    pub bands: Vec<Band>,
+    /// The ID of the guild.
+    pub guild_id: String,
+    op: Opcode,
+}
+
+impl Equalizer {
+    /// Creates a new set of equalizer settings for a guild.
+    ///
+    /// # Examples
+    ///
+    /// Equalize a guild:
+    ///
+    /// ```rust,no_run
+    /// # extern crate lavalink;
+    /// #
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<Error>> {
+    /// #
+    /// use lavalink::model::{Band, Equalizer};
+    ///
+    /// let bands = vec![
+    ///     Band::new(0, 0.25)?,
+    ///     Band::new(1, 0.0)?,
+    /// ];
+    /// let _equalizer = Equalizer::new("381880193251409931", bands);
+    /// #     Ok(())
+    /// # }
+    /// ```
+    pub fn new(
+        guild_id: impl Into<String>,
+        bands: impl IntoIterator<Item = Band>,
+    ) -> Self {
+        Self::_new(guild_id.into(), bands.into_iter().collect::<Vec<_>>())
+    }
+
+    fn _new(guild_id: String, bands: Vec<Band>) -> Self {
+        Self {
+            op: Opcode::Equalizer,
+            bands,
+            guild_id,
+        }
+    }
+}
+
 /// An event from the server.
 ///
 /// **Note**: This is only sent from a node.
@@ -86,6 +239,8 @@ pub enum Event {
     TrackException(EventTrackException),
     /// An indicator that a track became stuck.
     TrackStuck(EventTrackStuck),
+    /// An indicator that a WebSocket connection to Discord closed.
+    WebSocketClosed(EventWebSocketClosed),
 }
 
 impl Event {
@@ -95,6 +250,7 @@ impl Event {
             Event::TrackEnd(e) => &e.guild_id,
             Event::TrackException(e) => &e.guild_id,
             Event::TrackStuck(e) => &e.guild_id,
+            Event::WebSocketClosed(e) => &e.guild_id,
         }
     }
 }
@@ -207,6 +363,51 @@ impl EventTrackStuck {
     }
 }
 
+/// A WebSocket connection to Discord closed.
+///
+/// **Note**: This is only sent from a node.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventWebSocketClosed {
+    /// Whether the remote host closed the connection.
+    pub by_remote: bool,
+    /// The close code from Discord.
+    pub code: u16,
+    /// The guild ID of the affected player.
+    pub guild_id: String,
+    /// The reason for the closing.
+    pub reason: String,
+    op: Opcode,
+}
+
+impl EventWebSocketClosed {
+    /// Creates a new EventWebSocketClosed instance.
+    #[inline]
+    pub fn new(
+        guild_id: impl Into<String>,
+        by_remote: bool,
+        code: u16,
+        reason: impl Into<String>,
+    ) -> Self {
+        Self::_new(guild_id.into(), by_remote, code, reason.into())
+    }
+
+    fn _new(
+        guild_id: String,
+        by_remote: bool,
+        code: u16,
+        reason: String,
+    ) -> Self {
+        Self {
+            op: Opcode::Event,
+            by_remote,
+            code,
+            guild_id,
+            reason,
+        }
+    }
+}
+
 /// A message sent to a node to modify the pause state a guild's player.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -255,6 +456,11 @@ pub struct Play {
     pub end_time: Option<u64>,
     /// The ID of the guild whose player is having a stream added.
     pub guild_id: String,
+    /// Whether to not replace the current playing song.
+    ///
+    /// Defaults to `false`. This means the default is to replace the current
+    /// song. Set to `true` to avoid replacing the current song.
+    pub no_replace: bool,
     op: Opcode,
     /// The time at which to start the stream.
     ///
@@ -297,9 +503,47 @@ impl Play {
         end_time: Option<u64>,
     ) -> Self {
         Self {
+            no_replace: false,
             op: Opcode::Play,
-            guild_id,
             end_time,
+            guild_id,
+            start_time,
+            track,
+        }
+    }
+
+    /// Creates a new `Play` message with `noReplace` set.
+    ///
+    ///
+    #[inline]
+    pub fn with_no_replace(
+        guild_id: impl Into<String>,
+        track: impl Into<String>,
+        start_time: Option<u64>,
+        end_time: Option<u64>,
+        no_replace: bool,
+    ) -> Self {
+        Self::_with_no_replace(
+            guild_id.into(),
+            track.into(),
+            start_time,
+            end_time,
+            no_replace,
+        )
+    }
+
+    fn _with_no_replace(
+        guild_id: String,
+        track: String,
+        start_time: Option<u64>,
+        end_time: Option<u64>,
+        no_replace: bool,
+    ) -> Self {
+        Self {
+            op: Opcode::Play,
+            end_time,
+            guild_id,
+            no_replace,
             start_time,
             track,
         }

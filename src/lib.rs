@@ -15,7 +15,7 @@
 //!
 //! ### Installation
 //!
-//! This library requires at least Rust 1.26.0.
+//! This library requires at least Rust 1.31.0.
 //!
 //! If using `lavalink.rs` directly, add the following to your `Cargo.toml`:
 //!
@@ -45,8 +45,8 @@
 //! [license]: https://github.com/serenity-rs/lavalink.rs/blob/master/LICENSE.md
 //! [license]: https://opensource.org/licenses/ISC
 //! [license-badge]: https://img.shields.io/badge/license-ISC-blue.svg?style=flat-square
-//! [rust badge]: https://img.shields.io/badge/rust-1.26+-93450a.svg?style=flat-square
-//! [rust link]: https://blog.rust-lang.org/2018/05/10/Rust-1.26.html
+//! [rust badge]: https://img.shields.io/badge/rust-1.31.0+-93450a.svg?style=flat-square
+//! [rust link]: https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html
 #![deny(missing_docs)]
 
 #[macro_use]

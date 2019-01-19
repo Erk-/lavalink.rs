@@ -15,6 +15,10 @@ pub enum Opcode {
     ///
     /// This is sent by the client to the server.
     Destroy,
+    /// Sets the equalizer for the guild.
+    ///
+    /// This is sent by the client to the server.
+    Equalizer,
     /// Indicates that the server emitted an event.
     ///
     /// This is sent by the server to the client.
@@ -62,6 +66,7 @@ impl ToString for Opcode {
 
         match *self {
             Destroy => "destroy",
+            Equalizer => "equalizer",
             Event => "event",
             Pause => "pause",
             Play => "play",
@@ -84,6 +89,7 @@ impl FromStr for Opcode {
 
         Ok(match s {
             "destroy" => Destroy,
+            "equalizer" => Equalizer,
             "voiceUpdate" => VoiceUpdate,
             "play" => Play,
             "stop" => Stop,
