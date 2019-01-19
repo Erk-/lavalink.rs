@@ -5,7 +5,7 @@
 lavalink.rs is a client implemented in Rust used for communicating with
 [lavalink] audio nodes.
 
-This library currently targets Lavalink **v3.3**.
+This library currently targets Lavalink **v3.2**.
 
 ### Library Implementations
 
