@@ -3,7 +3,7 @@
 
 use crate::Result;
 use percent_encoding::{self, DEFAULT_ENCODE_SET};
-use reqwest::header::{ContentType, Headers};
+use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue};
 use reqwest::{Body, Client as ReqwestClient, Method, Request, RequestBuilder};
 use serde_json;
 use std::io::Read;
@@ -163,12 +163,12 @@ fn decode_track(
     let uri = format!("/decodetrack?track={}", track);
     let request = create_request(
         client,
-        Method::Get,
+        Method::GET,
         uri.as_ref(),
         None,
         host,
         password,
-    ).build()?;
+    )?.build()?;
 
     let response = run_request(client, request)?;
 
@@ -187,16 +187,15 @@ fn decode_tracks(
     tracks: &[Vec<u8>],
 ) -> Result<Vec<LoadedTrack>> {
     let tracks = serde_json::to_vec(&tracks)?;
-    let body = (tracks, ContentType::json());
 
     let request = create_request(
         client,
-        Method::Post,
+        Method::POST,
         "/decodetracks",
-        Some(body),
+        Some(tracks),
         host,
         password,
-    ).build()?;
+    )?.build()?;
 
     run_request(client, request)
         .and_then(|resp| serde_json::from_slice(&resp).map_err(From::from))
@@ -218,12 +217,12 @@ fn load_tracks(
     let uri = format!("/loadtracks?identifier={}", identifier);
     let request = create_request(
         client,
-        Method::Get,
+        Method::GET,
         uri.as_ref(),
         None,
         host,
         password,
-    ).build()?;
+    )?.build()?;
 
     run_request(client, request)
         .and_then(|body| serde_json::from_slice(&body).map_err(From::from))
@@ -234,25 +233,27 @@ fn create_request<'a>(
     client: &'a ReqwestClient,
     method: Method,
     uri: &str,
-    body: Option<(Vec<u8>, ContentType)>,
+    body: Option<Vec<u8>>,
     host: &str,
     password: &[u8],
-) -> RequestBuilder {
+) -> Result<RequestBuilder> {
     let mut builder = client.request(method, &format!("{}{}", host, uri));
 
-    let mut headers = Headers::new();
+    let mut headers = HeaderMap::new();
 
     // cant use hyper::header::Authorization because it requires prefix of Basic or Bearer
-    headers.set_raw("Authorization", vec![password.to_owned()]);
+    headers.insert(AUTHORIZATION, HeaderValue::from_bytes(password)?);
 
-    if let Some((body, content_type)) = body {
-        builder.body(Body::from(body));
-        headers.set(content_type);
+    if let Some(body) = body {
+        builder = builder.body(Body::from(body));
+        let value = HeaderValue::from_static("application/json");
+
+        headers.insert(CONTENT_TYPE, value);
     }
 
-    builder.headers(headers);
+    builder = builder.headers(headers);
 
-    builder
+    Ok(builder)
 }
 
 fn run_request(client: &ReqwestClient, request: Request) -> Result<Vec<u8>> {

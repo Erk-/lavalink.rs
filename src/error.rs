@@ -15,7 +15,10 @@ use http::{
 #[cfg(feature = "hyper")]
 use hyper::error::Error as HyperError;
 #[cfg(feature = "reqwest")]
-use reqwest::Error as ReqwestError;
+use reqwest::{
+    header::InvalidHeaderValue,
+    Error as ReqwestError,
+};
 
 /// Common result type returned by library functions.
 ///
@@ -33,6 +36,9 @@ pub enum Error {
     /// An error from the `hyper` crate.
     #[cfg(feature = "hyper")]
     Hyper(HyperError),
+    /// An invalid header value while setting a reqwest header.
+    #[cfg(feature = "reqwest")]
+    InvalidHeaderValue(InvalidHeaderValue),
     /// An error from the `std::io` module.
     Io(IoError),
     /// An error from the `serde_json` crate.
@@ -68,6 +74,8 @@ impl StdError for Error {
             Error::Http(ref inner) => inner.description(),
             #[cfg(feature = "hyper")]
             Error::Hyper(ref inner) => inner.description(),
+            #[cfg(feature = "reqwest")]
+            Error::InvalidHeaderValue(ref inner) => inner.description(),
             Error::Io(ref inner) => inner.description(),
             Error::Json(ref inner) => inner.description(),
             Error::PlayerAlreadyExists => "Player already exists for the guild",
@@ -93,6 +101,13 @@ impl From<HttpError> for Error {
 impl From<HyperError> for Error {
     fn from(err: HyperError) -> Self {
         Error::Hyper(err)
+    }
+}
+
+#[cfg(feature = "reqwest")]
+impl From<InvalidHeaderValue> for Error {
+    fn from(err: InvalidHeaderValue) -> Self {
+        Error::InvalidHeaderValue(err)
     }
 }
 
