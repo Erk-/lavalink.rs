@@ -804,7 +804,7 @@ impl VoiceUpdate {
         endpoint: String,
     ) -> Self {
         Self {
-            event: VoiceUpdateEvent::new(endpoint, guild_id.as_ref(), token),
+            event: VoiceUpdateEvent::new(endpoint, &guild_id, token),
             op: Opcode::VoiceUpdate,
             session_id,
             guild_id,
